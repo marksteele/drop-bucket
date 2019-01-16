@@ -1,0 +1,66 @@
+service: drop-bucket
+
+plugins:
+  - serverless-offline
+  - serverless-finch # static site to s3 deployment
+  - serverless-plugin-optimize
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  client: # for serverless-finch
+    bucketName: ${self:custom.stage}-drop-bucket-ui
+  avDefsBucketName: ${self:custom.stage}-drop-bucket-av-defs
+  fileBucketName: ${self:custom.stage}-drop-bucket-files
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: dev
+  region: us-east-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:ListBucket
+      Resource: "arn:aws:s3:::${self:custom.fileBucketName}"
+    - Effect: Allow
+      Action:
+        - s3:*
+      Resource: "arn:aws:s3:::${self:custom.fileBucketName}/*"
+    - Effect: Allow
+      Action:
+        - s3:ListBucket
+      Resource: "arn:aws:s3:::${self:custom.avDefsBucketName}"
+    - Effect: Allow
+      Action:
+        - s3:*
+      Resource: "arn:aws:s3:::${self:custom.avDefsBucketName}/*"
+
+functions:
+  # index:
+  #   handler: index.index
+  #   events:
+  #     - http:
+  #         path: /
+  #         method: get
+  #         cors: true
+  #         authorizer: aws_iam ## to allow an authenticated user to call an api function....
+  upload_handler:
+    optimize:
+      includePaths:
+        - clamav/clamscan
+        - clamav/libclam....
+    handler: upload.process
+    event: # s3 object create
+  av_defs_updater:
+    optimize:
+      includePaths:
+        - clamav/clamscan
+        - clamav/libclam....
+    handler: freshclam.update
+    event: # cron
+
+# Create our resources with separate CloudFormation templates
+resources:
+  - ${file(resources/s3-bucket.yml)}
+  - ${file(resources/cognito-user-pool.yml)}
+  - ${file(resources/cognito-identity-pool.yml)}

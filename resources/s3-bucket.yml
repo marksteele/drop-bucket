@@ -1,0 +1,73 @@
+Resources:
+  FileBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName:  ${self:custom.fileBucketName}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+             SSEAlgorithm: "AES256"
+      LifecycleConfiguration:
+        Rules:
+          - ExpirationInDays: 7
+      CorsConfiguration:
+        CorsRules:
+          -
+            AllowedOrigins:
+              - '*'
+            AllowedHeaders:
+              - '*'
+            AllowedMethods:
+              - GET
+              - PUT
+              - POST
+              - DELETE
+              - HEAD
+            MaxAge: 3000
+  VirusDefsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName:  ${self:custom.avDefsBucketName}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+             SSEAlgorithm: "AES256"
+  UIBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName:  ${self:custom.client.BucketName}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+             SSEAlgorithm: "AES256"
+  S3BucketPolicy:
+    Type: AWS::S3::BucketPolicy  
+    Properties:
+      Bucket:
+        Ref: FileBucket
+      PolicyDocument:
+        Statement:
+        - Sid: DenyUnEncryptedObjectUploads
+          Effect: Deny
+          Principal: "*"
+          Action: s3:PutObject
+          Resource:
+            Fn::Join:
+            - ''
+            - - 'arn:aws:s3:::'
+              - Ref: FileBucket
+              - "/*"
+          Condition:
+            StringNotEquals:
+              s3:x-amz-server-side-encryption: AES256
+
+Outputs:
+  FileBucketName:
+    Value:
+      Ref: FileBucket
+  VirusDefsBucketName:
+    Value:
+      Ref: VirusDefsBucket
+  UIBucketName:
+    Value:
+      Ref: UIBucket
