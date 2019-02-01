@@ -54,6 +54,12 @@ sls client deploy -s dev --aws-profile ctrl-alt-del --region us-east-1
 
 # Credits
 
+## Virus scanning approach
+
 https://engineering.upside.com/s3-antivirus-scanning-with-lambda-and-clamav-7d33f9c5092e
+
 https://blog.truework.com/2018-07-09-s3-antivirus-lambda-function
+
+## UI inspiration
+
 https://serverless-stack.com/
