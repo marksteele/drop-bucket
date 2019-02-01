@@ -5,10 +5,15 @@ plugins:
   - serverless-finch # static site to s3 deployment
   - serverless-plugin-optimize
 
+package:
+  individually: true
+
 custom:
   stage: ${opt:stage, self:provider.stage}
   client: # for serverless-finch
     bucketName: ${self:custom.stage}-drop-bucket-ui
+    distributionFolder: client/build
+    errorDocument: index.html
   avDefsBucketName: ${self:custom.stage}-drop-bucket-av-defs
   fileBucketName: ${self:custom.stage}-drop-bucket-files
 
@@ -17,6 +22,9 @@ provider:
   runtime: nodejs8.10
   stage: dev
   region: us-east-1
+  environment:
+    CLAMAV_BUCKET_NAME: ${self:custom.avDefsBucketName}
+    FILE_BUCKET_NAME: ${self:custom.fileBucketName}
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -36,30 +44,45 @@ provider:
       Resource: "arn:aws:s3:::${self:custom.avDefsBucketName}/*"
 
 functions:
-  # index:
-  #   handler: index.index
-  #   events:
-  #     - http:
-  #         path: /
-  #         method: get
-  #         cors: true
-  #         authorizer: aws_iam ## to allow an authenticated user to call an api function....
-  upload_handler:
+  list:
+    handler: list.list
+    events:
+      - http:
+          path: /
+          method: get
+          cors: true
+          authorizer: aws_iam
+  clam_scan:
+    timeout: 600
+    memory: 3008
     optimize:
       includePaths:
-        - clamav/clamscan
-        - clamav/libclam....
-    handler: upload.process
-    event: # s3 object create
+        - av/bin/clamscan
+        - av/bin/libclamav.so.9
+        - av/bin/libclammspack.so.0
+        - av/bin/libjson-c.so.2
+        - av/bin/libjson.so.0
+        - av/bin/libpcre2-8.so.0
+        - av/bin/libpcre2-posix.so.1
+        - av/bin/libltdl.so.7
+    handler: clam.scan
   av_defs_updater:
+    timeout: 600
     optimize:
       includePaths:
-        - clamav/clamscan
-        - clamav/libclam....
+        - av/bin/freshclam
+        - av/bin/libclamav.so.9
+        - av/bin/libclammspack.so.0
+        - av/bin/libjson-c.so.2
+        - av/bin/libjson.so.0
+        - av/bin/libpcre2-8.so.0
+        - av/bin/libpcre2-posix.so.1
+        - av/bin/libltdl.so.7
+        - av/etc/freshclam.conf
     handler: freshclam.update
-    event: # cron
+    events:
+      - schedule: cron(0 12 * * ? *)
 
-# Create our resources with separate CloudFormation templates
 resources:
   - ${file(resources/s3-bucket.yml)}
   - ${file(resources/cognito-user-pool.yml)}

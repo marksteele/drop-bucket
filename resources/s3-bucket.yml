@@ -10,6 +10,7 @@ Resources:
       LifecycleConfiguration:
         Rules:
           - ExpirationInDays: 7
+            Status: Enabled
       CorsConfiguration:
         CorsRules:
           -
@@ -23,6 +24,8 @@ Resources:
               - POST
               - DELETE
               - HEAD
+            ExposedHeaders:
+              - ETag
             MaxAge: 3000
   VirusDefsBucket:
     Type: AWS::S3::Bucket
@@ -35,7 +38,7 @@ Resources:
   UIBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName:  ${self:custom.client.BucketName}
+      BucketName:  ${self:custom.client.bucketName}
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
@@ -60,6 +63,21 @@ Resources:
           Condition:
             StringNotEquals:
               s3:x-amz-server-side-encryption: AES256
+        - Sid: DenyAccessToInfectedFiles
+          Effect: Deny
+          Principal: "*"
+          Action:
+            - s3:GetObject
+            - s3:PutObjectTagging
+          Resource:
+            Fn::Join:
+            - ''
+            - - 'arn:aws:s3:::'
+              - Ref: FileBucket
+              - "/*"
+          Condition:
+            StringEquals:
+              "s3:ExistingObjectTag/virusScanStatus": "INFECTED"
 
 Outputs:
   FileBucketName:

@@ -1,35 +1,27 @@
 {
-  "name": "notes-app-api",
-  "version": "1.1.0",
-  "description": "Demo notes API created as a part of the Serverless-Stack.com tutorial.",
-  "main": "handler.js",
-  "scripts": {
-    "test": "jest"
-  },
-  "author": "",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/AnomalyInnovations/serverless-stack-demo-api.git"
-  },
+  "name": "drop-bucket",
+  "version": "1.0.0",
+  "description": "File sharing service",
+  "repository": "",
+  "author": "Mark Steele <mark@control-alt-del.org>",
+  "license": "GPL",
+  "dependencies": {},
   "devDependencies": {
-    "aws-sdk": "^2.224.1",
-    "babel-core": "^6.26.0",
-    "babel-loader": "^7.1.4",
-    "babel-plugin-source-map-support": "^1.0.0",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-env": "^1.6.1",
-    "babel-preset-stage-3": "^6.24.1",
-    "jest": "^21.2.1",
-    "serverless-offline": "^3.18.0",
-    "serverless-webpack": "^5.1.0",
-    "webpack": "^4.2.0",
-    "webpack-node-externals": "^1.6.0"
+    "aws-sdk": "^2.12.0",
+    "aws-sdk-mock": "^4.1.0",
+    "babel-preset-es2015": "^6.24.1",
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0",
+    "nyc": "^13.0.1",
+    "serverless-finch": "^2.3.2",
+    "serverless-offline": "^3.25.11",
+    "serverless-plugin-optimize": "^1.0.0-rc.15",
+    "sinon": "^6.3.4"
   },
-  "dependencies": {
-    "babel-runtime": "^6.26.0",
-    "source-map-support": "^0.4.18",
-    "stripe": "^5.8.0",
-    "uuid": "^3.2.1"
+  "scripts": {
+    "test": "IS_TEST=1 mocha",
+    "coverage": "IS_TEST=1 nyc --check-coverage --lines 75 --per-file mocha",
+    "coverage-report": "IS_TEST=1 nyc --check-coverage --report -r html mocha",
+    "lint": "eslint --ignore-path .gitignore ."
   }
 }
