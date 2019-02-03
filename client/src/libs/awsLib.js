@@ -14,11 +14,19 @@ export async function listFiles() {
   return files;
 }
 
-export async function getUrl(file) {
+export function getUrl(file) {
   try {
-    const url =  await Storage.vault.get(file,{ level: 'private', Expires: 86400*7});
+    const url = Storage.vault.get(file,{ level: 'private', Expires: 86400*7});
     return url;  
   } catch (e) {
     console.log(e);
   }
+}
+
+  export async function deleteFile(file) {
+    try {
+      await Storage.vault.remove(file);
+    } catch (e) {
+      console.log(e);
+    }
 }
