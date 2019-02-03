@@ -42,13 +42,13 @@ sls deploy -s dev --aws-profile ctrl-alt-del --region us-east-1
 Customize the file `client/src/config.js` with your endpoints.
 
 ```
+cd client
 npm run build
 ```
 
 ## Deploy the UI
 
 ```
-cd client
 sls client deploy -s dev --aws-profile ctrl-alt-del --region us-east-1
 ```
 
