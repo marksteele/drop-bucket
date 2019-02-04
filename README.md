@@ -49,7 +49,7 @@ npm run build
 ## Deploy the UI
 
 ```
-sls client deploy -s dev --aws-profile ctrl-alt-del --region us-east-1
+sls client deploy -s dev --no-confirm --aws-profile ctrl-alt-del --region us-east-1
 ```
 
 # Credits
