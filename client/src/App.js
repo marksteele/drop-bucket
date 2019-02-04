@@ -53,8 +53,8 @@ class App extends Component {
       <div className="App container">
         <Navbar fluid collapseOnSelect>
           <Navbar.Header>
-            <Navbar.Brand>
-              <Link to="/">DropBucket</Link>
+            <Navbar.Brand><Link to="/">
+              <img alt="" src="favicon.ico" style={{display: 'inline'}}/>{' DropBucket'}</Link>
             </Navbar.Brand>
             <Navbar.Toggle />
           </Navbar.Header>
@@ -75,8 +75,12 @@ class App extends Component {
               }
             </Nav>
           </Navbar.Collapse>
-        </Navbar>
+        
         <Routes childProps={childProps} />
+        </Navbar>
+        <Navbar fixed="bottom" bg="dark">
+        <Navbar.Brand>{"\u00a9"} 2019 - Mark Steele </Navbar.Brand>
+      </Navbar>
       </div>
     );
   }

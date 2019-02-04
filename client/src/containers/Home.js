@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { API } from "aws-amplify";
 import { Link } from "react-router-dom";
 import { LinkContainer } from "react-router-bootstrap";
-import { PageHeader, ListGroup, ListGroupItem } from "react-bootstrap";
+import { PageHeader, ListGroup, ListGroupItem, Navbar } from "react-bootstrap";
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 //import { listFiles } from "../libs/awsLib";
 import { deleteFile } from "../libs/awsLib";
@@ -78,7 +78,7 @@ export default class Home extends Component {
                 {`Size: ${file.Size}`}<br/>
                 <button onClick={ this.delete.bind(this, file.Key) }>Delete</button>
                 {file.Tags.virusScanStatus === 'CLEAN' ? (<span>
-                <a href={file.Url} target='_new'><button>Download</button></a> 
+                <a href={file.Url} target='_new' style={{textDecoration: 'none', 'color': 'black'}}><button>Download</button></a> 
                 <CopyToClipboard text={file.Url}><button>Copy sharing link</button></CopyToClipboard></span>
                 ) : (<span></span>)}
               </ListGroupItem>
@@ -98,7 +98,7 @@ export default class Home extends Component {
   renderLander() {
     return (
       <div className="lander">
-        <h1>DropBucket</h1>
+        <h1><img alt="" height="40" src="favicon.ico"/> <Link to="/">DropBucket</Link></h1>
         <p>A simple file sharing app</p>
         <div>
           <Link to="/login" className="btn btn-info btn-lg">
@@ -116,7 +116,7 @@ export default class Home extends Component {
     return (
       <div className="files">
         <PageHeader>Your Files <button onClick={this.refresh}>&#x21bb;</button></PageHeader>
-        <div>Note: files auto-delete after 7 days. Links expire after 7 days.</div>
+        <div>Note: files auto-delete after 7 days.</div>
         <ListGroup>
           {!this.state.isLoading && this.renderFilesList(this.state.files)}
         </ListGroup>
@@ -126,9 +126,11 @@ export default class Home extends Component {
 
   render() {
     return (
+      <>
       <div className="Home">
         {this.props.isAuthenticated ? this.renderFiles() : this.renderLander()}
       </div>
+      </>
     );
   }
 }
