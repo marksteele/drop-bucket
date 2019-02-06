@@ -32,7 +32,7 @@ You get to control which AWS region your files are stored in.
 
 ## Scalability
 
-As this is a serverless architecture relying heavily on AWS infrastructure, it could easily scale to millions of users storing petabytes of data without requiring any specific scaling actions (with the possibly exception of increasing service limits for API Gateway/Lambda/S3).
+As this is a serverless architecture relying heavily on AWS infrastructure, it could easily scale to millions of users storing petabytes of data without requiring any specific scaling actions (with the possible exception of increasing service limits for API Gateway/Lambda/S3).
 
 The client application is a single-page application, and communicates directly with the S3 API.
 
@@ -46,15 +46,15 @@ This is a browser based application. If your browser is old, this might not work
 
 It doesn't keep your files in sync, it's up to you to upload files.
 
-It's not a collaboration tool, doesn't do any versioning.
+It's not a collaboration tool, it doesn't do any versioning.
 
 ## Pricing scenario
 
 This scenario assumes the US-EAST-1 AWS region.
 
-### S3
-
 You have 50 users who each need to store 100 files each, totalling 1 GB per user.
+
+### S3
 
 The storage costs on that are $0.023 per GB * 50 GB: 1.15$ USD per month.
 
@@ -82,9 +82,15 @@ API Gateway sub-total: 3.50$
 
 There's a perpetual free-tier for Lambda functions, and it's highly likely that the service could run in the free tier with 50 users pretty much forever given the usage scenario I've described so far.
 
-If our users somehow generated 5000 requests to the Lambdas with a mid-size Lambda of 1.5Gb and each execution took 30 seconds, the execution cost for Lambda would be 3.08$ USD. 
+If our users somehow generated 5000 requests to the Lambdas with a mid-size provisioned Lambda (1.5Gb RAM) and each execution took 30 seconds, the execution cost for Lambda would be 3.08$ USD. 
 
 Lambda sub-total: 3.08$ 
+
+### Cognito
+
+The first 50,000 monthly active users in Cognito are free.
+
+Cognito sub-total: 0$
 
 ### Total
 
@@ -108,7 +114,7 @@ Create a text file with the following content:
 X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*
 ```
 
-Upload it to the s3 bucket. Wait for scan to occur and check object tags, should report the file as infected.
+Upload it via the UI. Wait for scan to occur and check object tags, should report the file as infected.
 
 # Configuration
 
@@ -134,10 +140,18 @@ npm i
 
 # Deploying the API
 
+Note: Before attempting to deploy you'll need to have your AWS credentials setup in a configuration profile or as environment variables. AWS has excellent documentation on how to do this.
+
 Customize the serverless.yml to change the bucket names, then:
 
 ```
-sls deploy -s dev --aws-profile ctrl-alt-del --region us-east-1
+sls deploy -s STAGENAME --region REGION --aws-profile YOURAWSPROFILENAMEIFYOUAREUSINGONE
+```
+
+ex:
+
+```
+sls deploy -s dev --region us-east-1 --aws-profile ctrl-alt-del
 ```
 
 # Building the UI
@@ -154,6 +168,13 @@ npm run build
 ```
 
 ## Deploy the UI
+
+(from the project checkout root)
+
+```
+sls client deploy -s STAGENAME --no-confirm --aws-profile YOURAWSPROFILENAMEIFYOUAREUSINGONE --region REGION
+```
+ex:
 
 ```
 sls client deploy -s dev --no-confirm --aws-profile ctrl-alt-del --region us-east-1
@@ -177,3 +198,4 @@ Docs on the process for updating the virus scanning engine.
 
 It'd be nice to get the bucket policy which prevents unencrypted uploads working, but it's probably a shortcoming of the Amplify library.
 
+Also if I could get the Amplify library to properly list items in S3, I could potentially remove the API Gateway/Lambda endpoint for file listing.
