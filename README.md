@@ -138,11 +138,11 @@ sudo npm i serverless -g
 npm i
 ```
 
-# Deploying the API
+# Deploying the infrastructure
 
 Note: Before attempting to deploy you'll need to have your AWS credentials setup in a configuration profile or as environment variables. AWS has excellent documentation on how to do this.
 
-Customize the serverless.yml to change the bucket names, then:
+Customize the serverless.yml to change the bucket names. Once that's done, you can deploy the API and provision all the infrastructure (Cognito user pools, S3 buckets, API Gateway endpoint, and Lambda function) with this command:
 
 ```
 sls deploy -s STAGENAME --region REGION --aws-profile YOURAWSPROFILENAMEIFYOUAREUSINGONE
@@ -179,6 +179,8 @@ ex:
 ```
 sls client deploy -s dev --no-confirm --aws-profile ctrl-alt-del --region us-east-1
 ```
+
+And there you go, the whole thing has been deployed with a bit of configuration and 3 commands.
 
 # Credits
 
