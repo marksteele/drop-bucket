@@ -1,10 +1,8 @@
 import React, { Component } from "react";
 import { API } from "aws-amplify";
-import { Link } from "react-router-dom";
 import { LinkContainer } from "react-router-bootstrap";
-import { PageHeader, ListGroup, ListGroupItem, Navbar } from "react-bootstrap";
+import { PageHeader, ListGroup, ListGroupItem } from "react-bootstrap";
 import {CopyToClipboard} from 'react-copy-to-clipboard';
-//import { listFiles } from "../libs/awsLib";
 import { deleteFile } from "../libs/awsLib";
 
 import "./Home.css";
@@ -14,7 +12,6 @@ import "./Home.css";
 export default class Home extends Component {
   constructor(props) {
     super(props);
-
     this.state = {
       isLoading: true,
       files: []
@@ -22,17 +19,12 @@ export default class Home extends Component {
   }
 
   async componentDidMount() {
-    if (!this.props.isAuthenticated) {
-      return;
-    }
-
     try {
       const files = await this.files();
       this.setState({ files });
     } catch (e) {
       alert(e);
     }
-
     this.setState({ isLoading: false });
   }
 
@@ -95,42 +87,17 @@ export default class Home extends Component {
     );
   }
 
-  renderLander() {
-    return (
-      <div className="lander">
-        <h1><img alt="" height="40" src="favicon.ico"/> <Link to="/">DropBucket</Link></h1>
-        <p>A simple file sharing app</p>
-        <div>
-          <Link to="/login" className="btn btn-info btn-lg">
-            Login
-          </Link>
-          <Link to="/signup" className="btn btn-success btn-lg">
-            Signup
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  renderFiles() {
-    return (
-      <div className="files">
-        <PageHeader>Your Files <button onClick={this.refresh}>&#x21bb;</button></PageHeader>
-        <div>Note: files auto-delete after 7 days.</div>
-        <ListGroup>
-          {!this.state.isLoading && this.renderFilesList(this.state.files)}
-        </ListGroup>
-      </div>
-    );
-  }
-
   render() {
     return (
-      <>
       <div className="Home">
-        {this.props.isAuthenticated ? this.renderFiles() : this.renderLander()}
+        <div className="files">
+          <PageHeader>Your Files <button onClick={this.refresh}>&#x21bb;</button></PageHeader>
+          <div>Note: files auto-delete after 7 days.</div>
+          <ListGroup>
+            {!this.state.isLoading && this.renderFilesList(this.state.files)}
+          </ListGroup>
       </div>
-      </>
+      </div>
     );
   }
 }

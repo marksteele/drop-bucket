@@ -1,55 +1,19 @@
+import { withAuthenticator } from 'aws-amplify-react';
 import React, { Component, Fragment } from "react";
 import { Auth } from "aws-amplify";
-import { Link, withRouter } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Nav, Navbar, NavItem } from "react-bootstrap";
-import { LinkContainer } from "react-router-bootstrap";
 import Routes from "./Routes";
 import "./App.css";
 
 class App extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      isAuthenticated: false,
-      isAuthenticating: true
-    };
-  }
-
-  async componentDidMount() {
-    try {
-      await Auth.currentSession();
-      this.userHasAuthenticated(true);
-    }
-    catch(e) {
-      if (e !== 'No current user') {
-        alert(e);
-      }
-    }
-
-    this.setState({ isAuthenticating: false });
-  }
-
-  userHasAuthenticated = authenticated => {
-    this.setState({ isAuthenticated: authenticated });
-  }
 
   handleLogout = async event => {
     await Auth.signOut();
-
-    this.userHasAuthenticated(false);
-
-    this.props.history.push("/login");
   }
 
   render() {
-    const childProps = {
-      isAuthenticated: this.state.isAuthenticated,
-      userHasAuthenticated: this.userHasAuthenticated
-    };
-
     return (
-      !this.state.isAuthenticating &&
       <div className="App container">
         <Navbar fluid collapseOnSelect>
           <Navbar.Header>
@@ -60,23 +24,13 @@ class App extends Component {
           </Navbar.Header>
           <Navbar.Collapse>
             <Nav pullRight>
-              {this.state.isAuthenticated
-                ? <Fragment>
+                 <Fragment>
                     <NavItem onClick={this.handleLogout}>Logout</NavItem>
                   </Fragment>
-                : <Fragment>
-                    <LinkContainer to="/signup">
-                      <NavItem>Signup</NavItem>
-                    </LinkContainer>
-                    <LinkContainer to="/login">
-                      <NavItem>Login</NavItem>
-                    </LinkContainer>
-                  </Fragment>
-              }
             </Nav>
           </Navbar.Collapse>
         
-        <Routes childProps={childProps} />
+        <Routes />
         </Navbar>
         <Navbar fixed="bottom" bg="dark">
         <Navbar.Brand>{"\u00a9"} 2019 - Mark Steele </Navbar.Brand>
@@ -85,5 +39,4 @@ class App extends Component {
     );
   }
 }
-
-export default withRouter(App);
+export default withAuthenticator(App);

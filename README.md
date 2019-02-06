@@ -4,35 +4,49 @@ DropBucket is a self-hosted file sharing tool. It relies on AWS infrastructure f
 
 It's meant to be used to share files with people in a transient way.
 
-## Pros
+## Use cases
 
-- User management is done via AWS Cognito (could easily be adapted to be a single-sign with various authentication providers)
-- Files are stored in S3
-  - It's cheap! It's reliable! It scales to infinity!
-  - Default bucket policy has encryption (via s3 bucket policy)
-  - Files auto-delete in 7 days (via s3 bucket lifecycle configuration)
-  - The client application is browser based, so files are directly talking to the S3 API (there's no server intermediary for file uploads/downloads)
-  - You get to choose which AWS region you want your data to live in.
-- Files are automatically scanned for virus on upload
-  - Files found to be infected cannot be accessed (s3 bucket policy)
-  - Virus definitions update daily (lambda cloudwatch scheduled event)
-- The backend API is serverless (lambda functions)
-  - Pay per use pricing
-  - Authenticated via AWS IAM policy/Cognito
-- The client is written as a single page application, and is hosted in S3
-  - It's cheap! It's reliable! It scales to infinity!
+You are security conscious and you need to share files with collegues, but don't want to email them, send them over slack, etc... 
 
-All these properties mean:
-- There is no fixed cost to run this service. 
-- It will scale from nothing (no cost) to any number of users servicing petabytes of data.
-- There is no per-user fixed cost
-- Pay for only s3 storage, data transfer fees (to and from S3) and API calls.
+You have regulatory or contractual provisions that prevent you from sharing files unsecurely and need to know exactly where your data is being stored and how it's being managed.
 
-## Cons
+You need to share big-ish files.
 
-- This is a browser based application. If your browser is old, this might not work for you.
-- It doesn't keep your files in sync, it's up to you to upload files.
-- It's not a collaboration tool, doesn't do any versioning.
+You'd like ot make sure that when people send you files, they are automatically scanned for viruses.
+
+## Security
+
+All client-server operations (authentication, directory listing, uploads, downloads) are secured by strong transport encryption (TLS). At rest, files are encrypted in S3 using server-side AES-256 encryption.
+
+The standards-based identity component (Cognito) is managed by AWS and is compliant to multiple certifications (HIPAA, PCI DSS, SOC, ISO/EIC 27001, ISO/EIC 27017, ISO/EIC 27018, and ISO 9001). It can be federated with a variety of identity providers if desired.
+
+The file storage component (S3) is designed for 99.99% availability, and 99.999999999% durability.
+
+All files are scanned for viruses automatically on upload by the Clam Anti-Virus software. Virus definitions are updated daily.
+
+Policy on the storage backend will prevent access to files that have been tagged as being infected by viruses.
+
+All files are automatically deleted after 7 days via S3 bucket lifecycle policy.
+
+You get to control which AWS region your files are stored in.
+
+## Scalability
+
+As this is a serverless architecture relying heavily on AWS infrastructure, it could easily scale to millions of users storing petabytes of data without requiring any specific scaling actions (with the possibly exception of increasing service limits for API Gateway/Lambda/S3).
+
+The client application is a single-page application, and communicates directly with the S3 API.
+
+## Limitations
+
+The default installation will host the website on S3 static website hosting. This is non HTTPS, although it's easy enough to create a CloudFront distribution in front of it and force SSL from CloudFront.
+
+The tool currently will limit uploads to 300 Mb, as that is a limitation of the virus scanning. The limit is imposed due to the relatively small amount of disk space that is available to Lambda functions (500 Mb). When factoring in the virus scanner and virus definitions, there's only about 300 Mb of usable space left. I'm erring on the side of caution, if a file can't be scanned or doesn't have a clean scan, it is not accessible.
+
+This is a browser based application. If your browser is old, this might not work for you.
+
+It doesn't keep your files in sync, it's up to you to upload files.
+
+It's not a collaboration tool, doesn't do any versioning.
 
 ## Pricing scenario
 
@@ -68,17 +82,21 @@ API Gateway sub-total: 3.50$
 
 There's a perpetual free-tier for Lambda functions, and it's highly likely that the service could run in the free tier with 50 users pretty much forever given the usage scenario I've described so far.
 
-If our users somehow generated 50000 requests to the Lambdas with a mid-size Lambda of 1.5Gb and each execution took 30 seconds, the execution cost for Lambda would be 30.84$ USD. This is an extremely conservative estimate for this scenario.
+If our users somehow generated 5000 requests to the Lambdas with a mid-size Lambda of 1.5Gb and each execution took 30 seconds, the execution cost for Lambda would be 3.08$ USD. 
 
-Lambda sub-total: 30.84$ 
+Lambda sub-total: 3.08$ 
 
 ### Total
 
-So the total all-in costs for this solution for our scenario is about 40$ per month or a little shy of 1$/month per user.
+So the total all-in costs for this solution for our scenario is about 13$ per month. 
+
+If in a given month users upload half as many files, the price would drop by half.
 
 ### Cost analysis
 
-While this is a bit more expensive on a per-user basis than other solutions like Google Drive/DropBox/OneDrive, with DropBucket you get to chose where your files are stored and you don't have to trust in their processes/infrastructure management. Everything about DropBucket is easily auditable.
+Looking at some of the other options out there, you can get approximately 1 Tb of storage for about 10$ per month per user. That's a pretty good price per user if all your users need 1 Tb of storage, but in scenarios where they only need a few gigabytes it's pretty steep.
+
+1 Tb of storage in S3 is about 20$ per month. Definitely more pricey than some of the cloud storage options out there, on the long run I'd imagine the pay-per-use model of DropBucket is cheaper if you don't need all the fancy features.
 
 It's hard to be the resiliency, speed, and scalability of S3, as you start going into the terabyte ranges the prices per Gb start dropping off.
 
@@ -92,6 +110,20 @@ X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*
 
 Upload it to the s3 bucket. Wait for scan to occur and check object tags, should report the file as infected.
 
+# Configuration
+
+You'll need to update the `serverless.yml` file and update the bucket configurations in the `custom` section. Ex:
+
+```
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  client:
+    bucketName: BUCKET_NAME_FOR_THE_WEB_CLIENT_UI
+    distributionFolder: client/build
+    errorDocument: index.html
+  avDefsBucketName: BUCKET_NAME_FOR_STORING_THE_ANTIVIRUS_DEFINITIONS
+  fileBucketName: BUCKET_NAME_THAT_WILL_STORE_THE_USER_UPLOADED_FILES
+```
 
 # Building the API
 
@@ -110,7 +142,11 @@ sls deploy -s dev --aws-profile ctrl-alt-del --region us-east-1
 
 # Building the UI
 
-The API must be deployed before building the UI, as you'll need to customize the file `client/src/config.js` with your endpoints/cognito pool configuration. Once that's done:
+The API must be deployed before building the UI, as you'll need to customize the file `client/src/config.js` with your endpoints/cognito pool configuration. 
+
+To get the needed values you'll need to login to the AWS console and find the Cognito pool id, cognito app client id, identity pool id, and API gateway url.
+
+Once that's done:
 
 ```
 cd client
