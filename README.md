@@ -199,3 +199,5 @@ Docs on the process for updating the virus scanning engine.
 It'd be nice to get the bucket policy which prevents unencrypted uploads working, but it's probably a shortcoming of the Amplify library.
 
 Also if I could get the Amplify library to properly list items in S3, I could potentially remove the API Gateway/Lambda endpoint for file listing.
+
+Get the Cognito CloudFormation template to only allow admin to create users and customize the email templates (if that's supported).
