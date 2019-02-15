@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 import { API } from "aws-amplify";
-import { LinkContainer } from "react-router-bootstrap";
 import { PageHeader, ListGroup, ListGroupItem } from "react-bootstrap";
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 import { deleteFile } from "../libs/awsLib";
+import NewFile from "./NewFile";
 
 import "./Home.css";
 
@@ -59,10 +59,8 @@ export default class Home extends Component {
   }
 
   renderFilesList(files) {
-    return [{}].concat(files).map(
+    return files.map(
       (file, i) =>
-        i !== 0
-          ?
               <ListGroupItem key={i}>
                 {`File name:  ${file.Key}`}<br/>
                 {`Virus scan status: ${file.Tags.virusScanStatus || 'UKNOWN'}`}<br/>
@@ -74,22 +72,13 @@ export default class Home extends Component {
                 <CopyToClipboard text={file.Url}><button>Copy sharing link</button></CopyToClipboard></span>
                 ) : (<span></span>)}
               </ListGroupItem>
-          : <LinkContainer
-              key="new"
-              to="/files/new"
-            >
-              <ListGroupItem>
-                <h4>
-                  <b>{"\uFF0B"}</b> Create a new file
-                </h4>
-              </ListGroupItem>
-            </LinkContainer>
     );
   }
 
   render() {
     return (
       <div className="Home">
+        <NewFile refresh={this.refresh} />
         <div className="files">
           <PageHeader>Your Files <button onClick={this.refresh}>&#x21bb;</button></PageHeader>
           <div>Note: files auto-delete after 7 days.</div>

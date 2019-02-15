@@ -1,77 +1,79 @@
 import React, { Component } from "react";
-import { FormGroup, FormControl, ControlLabel } from "react-bootstrap";
-import LoaderButton from "../components/LoaderButton";
 import { s3Upload } from "../libs/awsLib";
 import config from "../config";
+import Dropzone from 'react-dropzone'
+import classNames from 'classnames'
+import LoadingOverlay from 'react-loading-overlay';
 import "./NewFile.css";
 
 export default class NewFile extends Component {
   constructor(props) {
     super(props);
-
-    this.file = null;
-
+    this.refresh = props.refresh;
     this.state = {
-      isLoading: null,
-      content: ""
+      isLoading: true,
     };
   }
 
-  handleChange = event => {
-    this.setState({
-      [event.target.id]: event.target.value
-    });
+  async componentDidMount() {
+    this.setState({ isLoading: false });
   }
 
-  handleFileChange = event => {
-    this.file = event.target.files[0];
-  }
-
-  handleSubmit = async event => {
-    event.preventDefault();
-    
-    if (!this.file) {
-      alert('Please select a file to upload');
-      return;
-    }
-
-    if (this.file && this.file.size > config.MAX_ATTACHMENT_SIZE) {
-      alert(`Please pick a file smaller than ${config.MAX_ATTACHMENT_SIZE/1000000} MB.`);
-      return;
-    }
-
-   
-
+  onDrop = acceptedFiles => {
     this.setState({ isLoading: true });
-
-    try {
-      await s3Upload(this.file);
-      this.props.history.push("/");
-    } catch (e) {
-      alert(e);
+    const promises = [];
+    acceptedFiles.forEach(file => {
+      if (file.size > config.MAX_ATTACHMENT_SIZE) {
+        alert(`One or more files exceeded maximum file size. Please pick a file smaller than ${config.MAX_ATTACHMENT_SIZE/1000000} MB.`);
+        return;
+      }
+      promises.push(s3Upload(file));
+    });
+    this.setState({ isLoading: true });
+    return Promise.all(promises).then(() => {
       this.setState({ isLoading: false });
-    }
+      this.refresh();
+    }).catch(() => {
+      alert("One or more errors occurred while uploading files. Please try again.");
+      this.setState({ isLoading: false });
+      this.refresh();
+    });
   }
 
   render() {
     return (
-      <div className="NewFile">
-        <form onSubmit={this.handleSubmit}>
-          <FormGroup controlId="file">
-            <ControlLabel>Attachment</ControlLabel>
-            <FormControl onChange={this.handleFileChange} type="file" />
-          </FormGroup>
-          <LoaderButton
-            block
-            bsStyle="primary"
-            bsSize="large"
-            type="submit"
-            isLoading={this.state.isLoading}
-            text="Create"
-            loadingText="Creating…"
-          />
-        </form>
+      <LoadingOverlay active={this.state.isLoading} spinner text="Storing file(s)" styles={{
+        overlay: (base) => ({
+          ...base,
+          background: 'rgba(0, 0, 0, 0.9)'
+          
+        })
+      }} >
+      <div className='square'>
+       <Dropzone onDrop={this.onDrop}  disabled={this.state.isLoading}>
+               {({getRootProps, getInputProps, isDragActive}) => {
+          return (
+            <div
+              {...getRootProps()}
+              className={classNames('dropzone', {'dropzone--isActive': isDragActive})}
+            >
+            <center>
+            <div className="circle">
+ 
+              <input {...getInputProps()} />
+              {
+                isDragActive ?
+                  <p>Drop files here...</p> :
+                  <p>Drop files here, or click to select files to upload.</p>
+              }
+              </div>
+              </center>
+            </div>
+          )
+        }}
+      </Dropzone>
       </div>
+      </LoadingOverlay>
     );
   }
 }

@@ -1,8 +1,20 @@
-.NewFilfe form {
-  padding-bottom: 15px;
-}
+  .circle {
+    height: 200px;
+    width: 200px;
+    border-radius: 100px;
+    color: #fff;
+    background-color: rgb(48, 120, 187);
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+  }
 
-.NewFile form textarea {
-  height: 300px;
-  font-size: 24px;
-}
+  .square {
+    border-width: 2px;
+    border-radius: 5px;
+    border-color: black;
+    border-style: dashed;  
+  }
