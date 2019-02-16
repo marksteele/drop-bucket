@@ -3,6 +3,7 @@ import { API } from "aws-amplify";
 import { PageHeader, ListGroup, ListGroupItem } from "react-bootstrap";
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 import { deleteFile } from "../libs/awsLib";
+import { toast } from 'react-toastify';
 import NewFile from "./NewFile";
 
 import "./Home.css";
@@ -23,7 +24,10 @@ export default class Home extends Component {
       const files = await this.files();
       this.setState({ files });
     } catch (e) {
-      alert(e);
+      toast.error("💩 - Something went wrong, sorry!", {
+        position: toast.POSITION.TOP_CENTER
+      });
+      console.log(e);
     }
     this.setState({ isLoading: false });
   }
@@ -41,14 +45,23 @@ export default class Home extends Component {
     try {
       const files = await this.files();
       this.setState({ files });
+      toast.success("File list refreshed!", {
+        position: toast.POSITION.TOP_CENTER
+      });
     } catch (e) {
-      alert(e);
+      toast.error("💩 - Something went wrong, sorry!", {
+        position: toast.POSITION.TOP_CENTER
+      });
+      console.log(e);
     }
     this.setState({ isLoading: false });
   };
 
   delete(file) {
     deleteFile(file);
+    toast.success("File deleted successfully!", {
+      position: toast.POSITION.TOP_CENTER
+    });
     this.setState(
       {
         files: this.state.files.filter((f) => { 
@@ -77,6 +90,7 @@ export default class Home extends Component {
 
   render() {
     return (
+      <>
       <div className="Home">
         <NewFile refresh={this.refresh} />
         <div className="files">
@@ -87,6 +101,7 @@ export default class Home extends Component {
           </ListGroup>
       </div>
       </div>
+      </>
     );
   }
 }

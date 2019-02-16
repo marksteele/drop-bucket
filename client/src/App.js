@@ -4,6 +4,10 @@ import { Auth } from "aws-amplify";
 import { Link } from "react-router-dom";
 import { Nav, Navbar, NavItem } from "react-bootstrap";
 import Routes from "./Routes";
+import { ToastContainer } from 'react-toastify';
+
+import 'react-toastify/dist/ReactToastify.min.css';
+
 import "./App.css";
 
 class App extends Component {
@@ -14,7 +18,9 @@ class App extends Component {
 
   render() {
     return (
+      <>
       <div className="App container">
+      <ToastContainer />
         <Navbar fluid collapseOnSelect>
           <Navbar.Header>
             <Navbar.Brand><Link to="/">
@@ -36,6 +42,7 @@ class App extends Component {
         <Navbar.Brand>{"\u00a9"} 2019 - Mark Steele </Navbar.Brand>
       </Navbar>
       </div>
+      </>
     );
   }
 }

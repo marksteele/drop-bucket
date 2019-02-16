@@ -4,6 +4,8 @@ import config from "../config";
 import Dropzone from 'react-dropzone'
 import classNames from 'classnames'
 import LoadingOverlay from 'react-loading-overlay';
+import { toast } from 'react-toastify';
+
 import "./NewFile.css";
 
 export default class NewFile extends Component {
@@ -24,17 +26,26 @@ export default class NewFile extends Component {
     const promises = [];
     acceptedFiles.forEach(file => {
       if (file.size > config.MAX_ATTACHMENT_SIZE) {
-        alert(`One or more files exceeded maximum file size. Please pick a file smaller than ${config.MAX_ATTACHMENT_SIZE/1000000} MB.`);
+        this.setState({ isLoading: false });
+        toast.error(`💩 - One or more files exceeded maximum file size. Please pick a file smaller than ${config.MAX_ATTACHMENT_SIZE/1000000} MB.`, {
+          position: toast.POSITION.TOP_CENTER
+        });
         return;
       }
       promises.push(s3Upload(file));
     });
     this.setState({ isLoading: true });
     return Promise.all(promises).then(() => {
+      toast.success("File(s) uploaded successfully!", {
+        position: toast.POSITION.TOP_CENTER
+      });
       this.setState({ isLoading: false });
       this.refresh();
-    }).catch(() => {
-      alert("One or more errors occurred while uploading files. Please try again.");
+    }).catch(e => { 
+      console.log(e);
+      toast.error('💩 - One or more errors occurred while uploading files. Please try again.', {
+        position: toast.POSITION.TOP_CENTER
+      });
       this.setState({ isLoading: false });
       this.refresh();
     });
