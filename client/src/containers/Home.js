@@ -94,7 +94,7 @@ export default class Home extends Component {
       <div className="Home">
         <NewFile refresh={this.refresh} />
         <div className="files">
-          <PageHeader>Your Files <button onClick={this.refresh}>&#x21bb;</button></PageHeader>
+          <PageHeader>Your Files <img height="30" alt="refresh" src="/refresh.png" onClick={this.refresh} /></PageHeader>
           <div>Note: files auto-delete after 7 days.</div>
           <ListGroup>
             {!this.state.isLoading && this.renderFilesList(this.state.files)}
