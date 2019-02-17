@@ -39,7 +39,7 @@ class App extends Component {
         <Routes />
         </Navbar>
         <Navbar fixed="bottom" bg="dark">
-        <Navbar.Brand>{"\u00a9"} 2019 - Mark Steele </Navbar.Brand>
+        <Navbar.Brand><a href="https://www.control-alt-del.org">{"\u00a9"} 2019 - Mark Steele</a></Navbar.Brand>
       </Navbar>
       </div>
       </>

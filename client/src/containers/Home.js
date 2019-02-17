@@ -45,9 +45,7 @@ export default class Home extends Component {
     try {
       const files = await this.files();
       this.setState({ files });
-      toast.success("File list refreshed!", {
-        position: toast.POSITION.TOP_CENTER
-      });
+
     } catch (e) {
       toast.error("💩 - Something went wrong, sorry!", {
         position: toast.POSITION.TOP_CENTER
