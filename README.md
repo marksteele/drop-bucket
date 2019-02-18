@@ -203,3 +203,12 @@ It'd be nice to get the bucket policy which prevents unencrypted uploads working
 Also if I could get the Amplify library to properly list items in S3, I could potentially remove the API Gateway/Lambda endpoint for file listing.
 
 Get the Cognito CloudFormation template to only allow admin to create users and customize the email templates (if that's supported).
+
+# Advanced sharing notes/flow
+
+Users self-sign up. Lambda auto-disables users upon confirmation and emails admin a notification.
+
+When you share with someone, you create an entry in dynamodb that has the recipient, and file path. Send them an email
+with app path that contains a parameter which maps to that share. Set TTL to expiry of file (based on file mod time).
+
+Add a section in home pages: shared with me. List out the files that are in DynamoDB.
