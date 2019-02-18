@@ -16,6 +16,8 @@ custom:
     errorDocument: index.html
   avDefsBucketName: ${self:custom.stage}-drop-bucket-av-defs
   fileBucketName: ${self:custom.stage}-drop-bucket-files
+  dynamoDbTableName: ${self:custom.stage}-drop-bucket-shared-files
+  cognitoUserPool: ${self:custom.stage}-user-pool
 
 provider:
   name: aws
@@ -25,23 +27,50 @@ provider:
   environment:
     CLAMAV_BUCKET_NAME: ${self:custom.avDefsBucketName}
     FILE_BUCKET_NAME: ${self:custom.fileBucketName}
-  iamRoleStatements:
+    DYNAMODB_TABLE_NAME: ${self:custom.dynamoDbTableName}
+    COGNITO_IDENTITY_POOL_ID: ${self:resources.Outputs.UserPoolId.Value}
+  iamRoleStatements: ## TODO: Split these out to be function specific...
     - Effect: Allow
       Action:
         - s3:ListBucket
-      Resource: "arn:aws:s3:::${self:custom.fileBucketName}"
+      Resource:
+        - "Fn::GetAtt": [ FileBucket, Arn ]
     - Effect: Allow
       Action:
         - s3:*
-      Resource: "arn:aws:s3:::${self:custom.fileBucketName}/*"
+      Resource:
+         Fn::Join:
+          - ""
+          - "Fn::GetAtt": [ FileBucket, Arn ]
+          - "/*"
     - Effect: Allow
       Action:
         - s3:ListBucket
-      Resource: "arn:aws:s3:::${self:custom.avDefsBucketName}"
+      Resource:
+        - "Fn::GetAtt": [ VirusDefsBucket, Arn ]
     - Effect: Allow
       Action:
         - s3:*
-      Resource: "arn:aws:s3:::${self:custom.avDefsBucketName}/*"
+      Resource:
+        Fn::Join:
+          - ""
+          - "Fn::GetAtt": [ VirusDefsBucket, Arn ]
+          - "/*"
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - "Fn::GetAtt": [ FileSharingTable, Arn ]
+    - Effect: Allow
+      Action:
+        - cognito-idp:AdminGetUser
+      Resource:
+        - "Fn::GetAtt": [ CognitoUserPool, Arn ]
 
 functions:
   list:
@@ -52,6 +81,8 @@ functions:
           method: get
           cors: true
           authorizer: aws_iam
+  disable_user:
+    handler: user.disable
   clam_scan:
     timeout: 600
     memory: 3008
@@ -87,3 +118,4 @@ resources:
   - ${file(resources/s3-bucket.yml)}
   - ${file(resources/cognito-user-pool.yml)}
   - ${file(resources/cognito-identity-pool.yml)}
+  - ${file(resources/dynamodb.yml)}

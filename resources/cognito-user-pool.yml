@@ -2,7 +2,7 @@ Resources:
   CognitoUserPool:
     Type: AWS::Cognito::UserPool
     Properties:
-      UserPoolName: ${self:custom.stage}-user-pool
+      UserPoolName: ${self:custom.cognitoUserPool}
       UsernameAttributes:
         - email
       AutoVerifiedAttributes:

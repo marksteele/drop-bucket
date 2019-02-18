@@ -1,0 +1,23 @@
+Resources:
+  FileSharingTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ${self:provider.environment.DYNAMODB_TABLE_NAME}
+      AttributeDefinitions:
+        - AttributeName: email
+          AttributeType: S
+        - AttributeName: filePath
+          AttributeType: S
+      KeySchema:
+        - AttributeName: email
+          KeyType: HASH
+        - AttributeName: filePath
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      TimeToLiveSpecification:
+        AttributeName: 'ttl'
+        Enabled: true
+      SSESpecification:
+        SSEEnabled: true
