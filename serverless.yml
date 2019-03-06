@@ -4,6 +4,7 @@ plugins:
   - serverless-offline
   - serverless-finch # static site to s3 deployment
   - serverless-plugin-optimize
+  - serverless-stack-output
 
 package:
   individually: true
@@ -18,6 +19,9 @@ custom:
   fileBucketName: ${self:custom.stage}-drop-bucket-files
   dynamoDbTableName: ${self:custom.stage}-drop-bucket-shared-files
   cognitoUserPool: ${self:custom.stage}-user-pool
+  output:
+    handler: scripts/output.process
+    file: client/output.json
 
 provider:
   name: aws
@@ -28,7 +32,7 @@ provider:
     CLAMAV_BUCKET_NAME: ${self:custom.avDefsBucketName}
     FILE_BUCKET_NAME: ${self:custom.fileBucketName}
     DYNAMODB_TABLE_NAME: ${self:custom.dynamoDbTableName}
-    COGNITO_IDENTITY_POOL_ID: ${self:resources.Outputs.UserPoolId.Value}
+    COGNITO_IDENTITY_POOL_ID: "/path/to/ssm/key -- set by output from stack" ## populate ssm from output
   iamRoleStatements: ## TODO: Split these out to be function specific...
     - Effect: Allow
       Action:
@@ -41,8 +45,9 @@ provider:
       Resource:
          Fn::Join:
           - ""
-          - "Fn::GetAtt": [ FileBucket, Arn ]
-          - "/*"
+          -
+            - "Fn::GetAtt": [ FileBucket, Arn ]
+            - "/*"
     - Effect: Allow
       Action:
         - s3:ListBucket
@@ -54,8 +59,9 @@ provider:
       Resource:
         Fn::Join:
           - ""
-          - "Fn::GetAtt": [ VirusDefsBucket, Arn ]
-          - "/*"
+          -
+            - "Fn::GetAtt": [ VirusDefsBucket, Arn ]
+            - "/*"
     - Effect: Allow
       Action:
         - dynamodb:Query
@@ -119,3 +125,4 @@ resources:
   - ${file(resources/cognito-user-pool.yml)}
   - ${file(resources/cognito-identity-pool.yml)}
   - ${file(resources/dynamodb.yml)}
+    

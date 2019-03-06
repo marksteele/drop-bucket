@@ -22,8 +22,7 @@ Resources:
 Outputs:
   UserPoolId:
     Value:
-      Ref: CognitoUserPool
-
+      "Ref": CognitoUserPool
   UserPoolClientId:
     Value:
       Ref: CognitoUserPoolClient

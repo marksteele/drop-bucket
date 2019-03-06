@@ -2,7 +2,7 @@ Resources:
   FileSharingTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: ${self:provider.environment.DYNAMODB_TABLE_NAME}
+      TableName: ${self:custom.dynamoDbTableName}
       AttributeDefinitions:
         - AttributeName: email
           AttributeType: S
