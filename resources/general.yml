@@ -1,0 +1,7 @@
+Outputs:
+  DeploymentRegion:
+    Value: ${opt:region, self:provider.region}
+  DeploymentStage:
+    Value: ${opt:stage, self:provider.stage}
+  DeploymentAwsProfile:
+    Value: ${opt:aws-profile}

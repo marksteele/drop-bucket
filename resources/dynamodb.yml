@@ -21,3 +21,8 @@ Resources:
         Enabled: true
       SSESpecification:
         SSEEnabled: true
+
+Outputs:
+  FileSharingTableName:
+    Value:
+      Ref: FileSharingTable

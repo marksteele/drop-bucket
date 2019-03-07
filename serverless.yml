@@ -21,7 +21,6 @@ custom:
   cognitoUserPool: ${self:custom.stage}-user-pool
   output:
     handler: scripts/output.process
-    file: client/output.json
 
 provider:
   name: aws
@@ -32,7 +31,7 @@ provider:
     CLAMAV_BUCKET_NAME: ${self:custom.avDefsBucketName}
     FILE_BUCKET_NAME: ${self:custom.fileBucketName}
     DYNAMODB_TABLE_NAME: ${self:custom.dynamoDbTableName}
-    COGNITO_IDENTITY_POOL_ID: "/path/to/ssm/key -- set by output from stack" ## populate ssm from output
+    COGNITO_IDENTITY_POOL_ID: "/ctrl-alt-del/drop-bucket/DYNAMODB_TABLE_NAME"
   iamRoleStatements: ## TODO: Split these out to be function specific...
     - Effect: Allow
       Action:
@@ -77,7 +76,11 @@ provider:
         - cognito-idp:AdminGetUser
       Resource:
         - "Fn::GetAtt": [ CognitoUserPool, Arn ]
-
+    - Effect: Allow
+      Action:
+        - ssm:DescribeParameters
+        - ssm:GetParameters
+      Resource: "arn:aws:ssm:${opt:region, self:provider.region}:*:parameter/drop-bucket/*"
 functions:
   list:
     handler: list.list
@@ -121,8 +124,11 @@ functions:
       - schedule: cron(0 12 * * ? *)
 
 resources:
+  - ${file(resources/general.yml)}
   - ${file(resources/s3-bucket.yml)}
   - ${file(resources/cognito-user-pool.yml)}
   - ${file(resources/cognito-identity-pool.yml)}
   - ${file(resources/dynamodb.yml)}
+
+
     
