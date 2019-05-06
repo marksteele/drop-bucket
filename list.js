@@ -1,5 +1,6 @@
+/* eslint-disable no-console */
 const ListService = require('./lib/list-service.js');
-// This should be replaced by a call from the client using the Storage API. Doesn't seem to work though...
+
 module.exports.list = (e, ctx, cb) => {
   if (!e.requestContext.identity.cognitoIdentityId) {
     cb(null, {

@@ -5,6 +5,7 @@ plugins:
   - serverless-finch # static site to s3 deployment
   - serverless-plugin-optimize
   - serverless-stack-output
+  - serverless-pseudo-parameters
 
 package:
   individually: true
@@ -31,7 +32,10 @@ provider:
     CLAMAV_BUCKET_NAME: ${self:custom.avDefsBucketName}
     FILE_BUCKET_NAME: ${self:custom.fileBucketName}
     DYNAMODB_TABLE_NAME: ${self:custom.dynamoDbTableName}
-    COGNITO_IDENTITY_POOL_ID: "/ctrl-alt-del/drop-bucket/DYNAMODB_TABLE_NAME"
+    COGNITO_IDENTITY_POOL_ID: "/ctrl-alt-del/drop-bucket/COGNITO_IDENTITY_POOL_ID"
+    ADMIN_EMAIL: "mark@control-alt-del.org"
+    WEBSITE_URL: "https://dropbucket.control-alt-del.org"
+    SHARE_PATH: "/share"
   iamRoleStatements: ## TODO: Split these out to be function specific...
     - Effect: Allow
       Action:
@@ -74,6 +78,7 @@ provider:
     - Effect: Allow
       Action:
         - cognito-idp:AdminGetUser
+        - cognito-idp:AdminDisableUser
       Resource:
         - "Fn::GetAtt": [ CognitoUserPool, Arn ]
     - Effect: Allow
@@ -81,6 +86,10 @@ provider:
         - ssm:DescribeParameters
         - ssm:GetParameters
       Resource: "arn:aws:ssm:${opt:region, self:provider.region}:*:parameter/drop-bucket/*"
+    - Effect: "Allow"
+      Action:
+        - "ses:SendEmail"
+      Resource: "*"
 functions:
   list:
     handler: list.list

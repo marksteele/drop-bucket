@@ -7,7 +7,8 @@ Resources:
         - email
       AutoVerifiedAttributes:
         - email
-
+      LambdaConfig:
+        PostConfirmation: "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage, self:provider.stage}-disable_user"
   CognitoUserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
@@ -17,6 +18,13 @@ Resources:
       ExplicitAuthFlows:
         - ADMIN_NO_SRP_AUTH
       GenerateSecret: false
+  UserPoolLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:invokeFunction
+      Principal: cognito-idp.amazonaws.com
+      FunctionName: "${self:service}-${opt:stage, self:provider.stage}-disable_user"
+      SourceArn: "arn:aws:cognito-idp:#{AWS::Region}:#{AWS::AccountId}:userpool/*"
 
 # Print out the Id of the User Pool that is created
 Outputs:

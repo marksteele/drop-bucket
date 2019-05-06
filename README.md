@@ -138,11 +138,10 @@ sudo npm i serverless -g
 npm i
 ```
 
-# Deploying the infrastructure
+# Deploying
 
-Note: Before attempting to deploy you'll need to have your AWS credentials setup in a configuration profile or as environment variables. AWS has excellent documentation on how to do this.
+Note: Before attempting to deploy you'll need to have your AWS credentials setup in a configuration profile. AWS has excellent documentation on how to do this. The deployment script assumes that you've done this. Trying to deploy without it will fail while trying to deploy the client code.
 
-Customize the serverless.yml to change the bucket names. Once that's done, you can deploy the API and provision all the infrastructure (Cognito user pools, S3 buckets, API Gateway endpoint, and Lambda function) with this command:
 
 ```
 sls deploy -s STAGENAME --region REGION --aws-profile YOURAWSPROFILENAMEIFYOUAREUSINGONE
@@ -154,33 +153,8 @@ ex:
 sls deploy -s dev --region us-east-1 --aws-profile ctrl-alt-del
 ```
 
-# Building the UI
+And there you go, the whole thing has been deployed with a bit of configuration and one command.
 
-The API must be deployed before building the UI, as you'll need to customize the file `client/src/config.js` with your endpoints/cognito pool configuration. 
-
-To get the needed values you'll need to login to the AWS console and find the Cognito pool id, cognito app client id, identity pool id, and API gateway url.
-
-Once that's done:
-
-```
-cd client
-npm run build
-```
-
-## Deploy the UI
-
-(from the project checkout root)
-
-```
-sls client deploy -s STAGENAME --no-confirm --aws-profile YOURAWSPROFILENAMEIFYOUAREUSINGONE --region REGION
-```
-ex:
-
-```
-sls client deploy -s dev --no-confirm --aws-profile ctrl-alt-del --region us-east-1
-```
-
-And there you go, the whole thing has been deployed with a bit of configuration and 3 commands.
 
 # Credits
 
@@ -199,10 +173,6 @@ https://serverless-stack.com/
 Docs on the process for updating the virus scanning engine.
 
 It'd be nice to get the bucket policy which prevents unencrypted uploads working, but it's probably a shortcoming of the Amplify library.
-
-Also if I could get the Amplify library to properly list items in S3, I could potentially remove the API Gateway/Lambda endpoint for file listing.
-
-Get the Cognito CloudFormation template to only allow admin to create users and customize the email templates (if that's supported).
 
 # Advanced sharing notes/flow
 
