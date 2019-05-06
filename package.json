@@ -6,7 +6,8 @@
   "author": "Mark Steele <mark@control-alt-del.org>",
   "license": "GPL",
   "dependencies": {
-    "moment": "^2.24.0"
+    "moment": "^2.24.0",
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
     "aws-sdk": "^2.12.0",

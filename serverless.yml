@@ -13,12 +13,14 @@ package:
 custom:
   stage: ${opt:stage, self:provider.stage}
   client: # for serverless-finch
-    bucketName: ${self:custom.stage}-drop-bucket-ui
+    bucketName: ${self:custom.stage}-${self:service}-ui
     distributionFolder: client/build
     errorDocument: index.html
-  avDefsBucketName: ${self:custom.stage}-drop-bucket-av-defs
-  fileBucketName: ${self:custom.stage}-drop-bucket-files
-  dynamoDbTableName: ${self:custom.stage}-drop-bucket-shared-files
+  avDefsBucketName: ${self:custom.stage}-${self:service}-av-defs
+  fileBucketName: ${self:custom.stage}-${self:service}-files
+  dynamoDbTableName: ${self:custom.stage}-${self:service}-shared-files
+  dynamoDbTableToIdx: ${self:custom.stage}-${self:service}-shared-files-to-idx
+  dynamoDbTableFromIdx: ${self:custom.stage}-${self:service}-shared-files-from-idx
   cognitoUserPool: ${self:custom.stage}-user-pool
   output:
     handler: scripts/output.process
@@ -32,6 +34,8 @@ provider:
     CLAMAV_BUCKET_NAME: ${self:custom.avDefsBucketName}
     FILE_BUCKET_NAME: ${self:custom.fileBucketName}
     DYNAMODB_TABLE_NAME: ${self:custom.dynamoDbTableName}
+    DYNAMODB_TABLE_TO_IDX: ${self:custom.stage}-${self:service}-shared-files-to-idx
+    DYNAMODB_TABLE_FROM_IDX: ${self:custom.stage}-${self:service}-shared-files-from-idx
     COGNITO_IDENTITY_POOL_ID: "/ctrl-alt-del/drop-bucket/COGNITO_IDENTITY_POOL_ID"
     ADMIN_EMAIL: "mark@control-alt-del.org"
     WEBSITE_URL: "https://dropbucket.control-alt-del.org"

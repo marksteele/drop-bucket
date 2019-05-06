@@ -4,15 +4,26 @@ Resources:
     Properties:
       TableName: ${self:custom.dynamoDbTableName}
       AttributeDefinitions:
-        - AttributeName: email
+        - AttributeName: shareId
+          AttributeType: S
+        - AttributeName: to
+          AttributeType: S
+        - AttributeName: from
           AttributeType: S
         - AttributeName: filePath
           AttributeType: S
       KeySchema:
-        - AttributeName: email
+        - AttributeName: shareId
           KeyType: HASH
-        - AttributeName: filePath
-          KeyType: RANGE
+      GlobalSecondaryIndex:
+        - IndexName: ${self:custom.dynamoDbTableToIdx}
+          KeySchema:
+            - AttributeName: to
+              KeyType: HASH
+        - IndexName: ${self:custom.dynamoDbTableFromIdx}
+          KeySchema:
+            - AttributeName: from
+              KeyType: HASH
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
