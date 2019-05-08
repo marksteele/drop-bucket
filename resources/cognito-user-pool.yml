@@ -1,14 +1,24 @@
 Resources:
   CognitoUserPool:
+    # DependsOn: DisableUserLambdaFunction
     Type: AWS::Cognito::UserPool
     Properties:
       UserPoolName: ${self:custom.cognitoUserPool}
-      UsernameAttributes:
+      UsernameAttributes: 
         - email
       AutoVerifiedAttributes:
         - email
+      EmailVerificationMessage: |
+        Welcome to DropBucket! 
+
+        Please enter the verification code: {####}
+
+        Note: Your account will be disabled until an administrator enables it.
+
+        - The DropBucket Team
+      EmailVerificationSubject: "Verify your DropBucket account"
       LambdaConfig:
-        PostConfirmation: "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage, self:provider.stage}-disable_user"
+        PostConfirmation: "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage, self:provider.stage}-disableUser"
   CognitoUserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
@@ -19,11 +29,14 @@ Resources:
         - ADMIN_NO_SRP_AUTH
       GenerateSecret: false
   UserPoolLambdaInvokePermission:
+    DependsOn: 
+      - CognitoUserPool
+      - DisableUserLambdaFunction
     Type: AWS::Lambda::Permission
     Properties:
       Action: lambda:invokeFunction
       Principal: cognito-idp.amazonaws.com
-      FunctionName: "${self:service}-${opt:stage, self:provider.stage}-disable_user"
+      FunctionName: "${self:service}-${opt:stage, self:provider.stage}-disableUser"
       SourceArn: "arn:aws:cognito-idp:#{AWS::Region}:#{AWS::AccountId}:userpool/*"
 
 # Print out the Id of the User Pool that is created

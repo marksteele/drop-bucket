@@ -172,13 +172,6 @@ https://serverless-stack.com/
 
 Docs on the process for updating the virus scanning engine.
 
-It'd be nice to get the bucket policy which prevents unencrypted uploads working, but it's probably a shortcoming of the Amplify library.
+A better deployment strategy. Can't get the virus scanning bucket hook auto-configured because of circular deps created by serverless on the custom S3 bucket properties. This is a stupid limitation of the framework.
 
-# Advanced sharing notes/flow
-
-Users self-sign up. Lambda auto-disables users upon confirmation and emails admin a notification.
-
-When you share with someone, you create an entry in dynamodb that has the recipient, and file path. Send them an email
-with app path that contains a parameter which maps to that share. Set TTL to expiry of file (based on file mod time).
-
-Add a section in home pages: shared with me. List out the files that are in DynamoDB.
+Maybe if I move the IAM perms to the s3 bucket outside of the serverless section into the resources....

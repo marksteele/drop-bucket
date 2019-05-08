@@ -33,7 +33,6 @@ export default class Home extends Component {
   }
 
   files() {
-    //return listFiles();
     return API.get("files", "/");
   }
 

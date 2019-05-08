@@ -68,7 +68,7 @@ Resources:
                       - '/*'
               
               # Allow users to upload attachments to their
-              # folder inside our S3 bucket
+              # folder inside our S3 bucket.. Should probably lock down actions to upload only...
               - Effect: 'Allow'
                 Action:
                   - 's3:*'
@@ -76,14 +76,14 @@ Resources:
                   - Fn::Join:
                     - ''
                     -
-                      - Fn::GetAtt: [FileBucket, Arn]
+                      - Fn::GetAtt: [S3BucketFiles, Arn]
                       - '/private/'
                       - '$'
                       - '{cognito-identity.amazonaws.com:sub}/*'
                   - Fn::Join:
                     - ''
                     -
-                      - Fn::GetAtt: [FileBucket, Arn]
+                      - Fn::GetAtt: [S3BucketFiles, Arn]
                       - '/private/'
                       - '$'
                       - '{cognito-identity.amazonaws.com:sub}'

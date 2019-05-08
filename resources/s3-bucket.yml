@@ -1,5 +1,6 @@
 Resources:
-  FileBucket:
+  S3BucketFiles:
+    # DependsOn: S3BucketFilesLambdaPermission
     Type: AWS::S3::Bucket
     Properties:
       BucketName:  ${self:custom.fileBucketName}
@@ -27,6 +28,13 @@ Resources:
             ExposedHeaders:
               - ETag
             MaxAge: 3000
+      # NotificationConfiguration:
+      #   LambdaConfigurations:
+      #   - Event: 's3:ObjectCreated:*'
+      #     Function: 
+      #       "Fn::GetAtt":
+      #         - ClamScanLambdaFunction
+      #         - Arn
   VirusDefsBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -47,7 +55,7 @@ Resources:
     Type: AWS::S3::BucketPolicy  
     Properties:
       Bucket:
-        Ref: FileBucket
+        Ref: S3BucketFiles
       PolicyDocument:
         Statement:
         - Sid: DenyUnEncryptedObjectUploads
@@ -58,7 +66,7 @@ Resources:
             Fn::Join:
             - ''
             - - 'arn:aws:s3:::'
-              - Ref: FileBucket
+              - Ref: S3BucketFiles
               - "/*"
           Condition:
             StringNotEquals:
@@ -73,16 +81,28 @@ Resources:
             Fn::Join:
             - ''
             - - 'arn:aws:s3:::'
-              - Ref: FileBucket
+              - Ref: S3BucketFiles
               - "/*"
           Condition:
             StringEquals:
               "s3:ExistingObjectTag/virusScanStatus": "INFECTED"
+  # S3BucketFilesLambdaPermission:
+  #     Type: "AWS::Lambda::Permission"
+  #     Properties:
+  #       FunctionName:
+  #         "Fn::GetAtt":
+  #           - ClamScanLambdaFunction
+  #           - Arn
+  #       Principal: "s3.amazonaws.com"
+  #       Action: "lambda:InvokeFunction"
+  #       SourceAccount:
+  #         Ref: AWS::AccountId
+  #       SourceArn: "arn:aws:s3:::${self:custom.fileBucketName}"
 
 Outputs:
   FileBucketName:
     Value:
-      Ref: FileBucket
+      Ref: S3BucketFiles
   VirusDefsBucketName:
     Value:
       Ref: VirusDefsBucket

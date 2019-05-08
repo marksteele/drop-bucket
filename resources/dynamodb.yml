@@ -4,26 +4,34 @@ Resources:
     Properties:
       TableName: ${self:custom.dynamoDbTableName}
       AttributeDefinitions:
-        - AttributeName: shareId
-          AttributeType: S
-        - AttributeName: to
-          AttributeType: S
-        - AttributeName: from
-          AttributeType: S
-        - AttributeName: filePath
-          AttributeType: S
+      - AttributeName: shareId
+        AttributeType: S
+      - AttributeName: to
+        AttributeType: S
+      - AttributeName: from
+        AttributeType: S
       KeySchema:
-        - AttributeName: shareId
+      - AttributeName: shareId
+        KeyType: HASH
+      GlobalSecondaryIndexes:
+      - IndexName: ${self:custom.dynamoDbTableToIdx}
+        Projection: 
+          ProjectionType: ALL
+        KeySchema:
+        - AttributeName: to
           KeyType: HASH
-      GlobalSecondaryIndex:
-        - IndexName: ${self:custom.dynamoDbTableToIdx}
-          KeySchema:
-            - AttributeName: to
-              KeyType: HASH
-        - IndexName: ${self:custom.dynamoDbTableFromIdx}
-          KeySchema:
-            - AttributeName: from
-              KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+      - IndexName: ${self:custom.dynamoDbTableFromIdx}
+        Projection: 
+          ProjectionType: ALL
+        KeySchema:
+        - AttributeName: from
+          KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1

@@ -1,31 +1,23 @@
 /* eslint-disable no-console */
-const { exec } = require('child_process');
+const cp = require('child_process');
+const proc = require('process');
 const fs = require('fs');
 
+const cwd = proc.cwd();
 
 function setSSMParam(data) {
-  exec(`aws ssm put-parameter --name "/ctrl-alt-del/drop-bucket/COGNITO_IDENTITY_POOL_ID" --value "${data.IdentityPoolId}" --region ${data.DeploymentRegion} --profile ${data.DeploymentAwsProfile} --type String --overwrite`, (error, stdout, stderr) => {
-    if (error) {
-      console.log(error);
-    } else {
-      console.log(stdout);
-      console.log(stderr);
-    }
-  });
+  console.log('Setting SSM parameters');
+  console.log(cp.execSync(`/usr/local/bin/aws ssm put-parameter --name "/ctrl-alt-del/drop-bucket/COGNITO_IDENTITY_POOL_ID" --value "${data.IdentityPoolId}" --region ${data.DeploymentRegion} --profile ${data.DeploymentAwsProfile} --type String --overwrite`).toString());
 }
 
 function buildClientUI() {
-  exec('cd client && npm i && npm run build && cd ..', (error, stdout, stderr) => {
-    if (error) {
-      console.log(error);
-    } else {
-      console.log(stdout);
-      console.log(stderr);
-    }
-  });
+  console.log('Building client UI');
+  console.log(cp.execSync('/usr/local/bin/npm i', { cwd: `${cwd}/client` }).toString());
+  console.log(cp.execSync('/usr/local/bin/npm run build', { cwd: `${cwd}/client` }).toString());
 }
 
 function writeConfig(data) {
+  console.log('Writing config');
   fs.writeFileSync(
     'client/src/config.js',
     fs.readFileSync('client/src/config.dist.js')
@@ -40,25 +32,14 @@ function writeConfig(data) {
 }
 
 function deployClient(data) {
-  exec(`sls client deploy -s ${data.DeploymentStage} --no-confirm --aws-profile ${data.DeploymentAwsProfile} --region ${data.DeploymentRegion} `, (error, stdout, stderr) => {
-    if (error) {
-      console.log(error);
-    } else {
-      console.log(stdout);
-      console.log(stderr);
-    }
-  });
+  console.log('Deploying client UI');
+  console.log(cp.execSync(`/usr/local/bin/sls client deploy -s ${data.DeploymentStage} --no-confirm --aws-profile ${data.DeploymentAwsProfile} --region ${data.DeploymentRegion}`).toString());
 }
 
 function process(data) {
-  console.log('Received Stack Output, running post-deployment');
-  console.log('Setting SSM parameters');
   setSSMParam(data);
-  console.log('Writing config');
   writeConfig(data);
-  console.log('Building client UI');
   buildClientUI();
-  console.log('Deploying client UI');
   deployClient(data);
 }
 

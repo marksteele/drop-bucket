@@ -18,9 +18,9 @@ custom:
     errorDocument: index.html
   avDefsBucketName: ${self:custom.stage}-${self:service}-av-defs
   fileBucketName: ${self:custom.stage}-${self:service}-files
-  dynamoDbTableName: ${self:custom.stage}-${self:service}-shared-files
-  dynamoDbTableToIdx: ${self:custom.stage}-${self:service}-shared-files-to-idx
-  dynamoDbTableFromIdx: ${self:custom.stage}-${self:service}-shared-files-from-idx
+  dynamoDbTableName: ${self:custom.stage}-${self:service}-files
+  dynamoDbTableToIdx: ${self:custom.stage}-${self:service}-files-to-idx
+  dynamoDbTableFromIdx: ${self:custom.stage}-${self:service}-files-from-idx
   cognitoUserPool: ${self:custom.stage}-user-pool
   output:
     handler: scripts/output.process
@@ -45,7 +45,7 @@ provider:
       Action:
         - s3:ListBucket
       Resource:
-        - "Fn::GetAtt": [ FileBucket, Arn ]
+        - "Fn::GetAtt": [ S3BucketFiles, Arn ]
     - Effect: Allow
       Action:
         - s3:*
@@ -53,7 +53,7 @@ provider:
          Fn::Join:
           - ""
           -
-            - "Fn::GetAtt": [ FileBucket, Arn ]
+            - "Fn::GetAtt": [ S3BucketFiles, Arn ]
             - "/*"
     - Effect: Allow
       Action:
@@ -94,6 +94,8 @@ provider:
       Action:
         - "ses:SendEmail"
       Resource: "*"
+
+
 functions:
   list:
     handler: list.list
@@ -103,9 +105,9 @@ functions:
           method: get
           cors: true
           authorizer: aws_iam
-  disable_user:
+  disableUser:
     handler: user.disable
-  clam_scan:
+  clamScan:
     timeout: 600
     memory: 3008
     optimize:
@@ -119,6 +121,8 @@ functions:
         - av/bin/libpcre2-posix.so.1
         - av/bin/libltdl.so.7
     handler: clam.scan
+    # events:
+    #   - s3: files
   av_defs_updater:
     timeout: 600
     optimize:

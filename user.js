@@ -4,6 +4,7 @@ const AWS = require('aws-sdk');
 module.exports.disable = (e, ctx, cb) => {
   const cognito = new AWS.CognitoIdentityServiceProvider();
   const ses = new AWS.SES();
+  console.log(e);
   cognito.adminDisableUser({ UserPoolId: e.userPoolId, Username: e.request.userAttributes.email })
     .promise()
     .then(() => ses.sendEmail(
