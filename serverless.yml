@@ -40,64 +40,10 @@ provider:
     ADMIN_EMAIL: "mark@control-alt-del.org"
     WEBSITE_URL: "https://dropbucket.control-alt-del.org"
     SHARE_PATH: "/share"
-  iamRoleStatements: ## TODO: Split these out to be function specific...
-    - Effect: Allow
-      Action:
-        - s3:ListBucket
-      Resource:
-        - "Fn::GetAtt": [ S3BucketFiles, Arn ]
-    - Effect: Allow
-      Action:
-        - s3:*
-      Resource:
-         Fn::Join:
-          - ""
-          -
-            - "Fn::GetAtt": [ S3BucketFiles, Arn ]
-            - "/*"
-    - Effect: Allow
-      Action:
-        - s3:ListBucket
-      Resource:
-        - "Fn::GetAtt": [ VirusDefsBucket, Arn ]
-    - Effect: Allow
-      Action:
-        - s3:*
-      Resource:
-        Fn::Join:
-          - ""
-          -
-            - "Fn::GetAtt": [ VirusDefsBucket, Arn ]
-            - "/*"
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-        - dynamodb:Scan
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem
-      Resource:
-        - "Fn::GetAtt": [ FileSharingTable, Arn ]
-    - Effect: Allow
-      Action:
-        - cognito-idp:AdminGetUser
-        - cognito-idp:AdminDisableUser
-      Resource:
-        - "Fn::GetAtt": [ CognitoUserPool, Arn ]
-    - Effect: Allow
-      Action:
-        - ssm:DescribeParameters
-        - ssm:GetParameters
-      Resource: "arn:aws:ssm:${opt:region, self:provider.region}:*:parameter/drop-bucket/*"
-    - Effect: "Allow"
-      Action:
-        - "ses:SendEmail"
-      Resource: "*"
-
 
 functions:
   list:
+    role: DropBucketListRole
     handler: list.list
     events:
       - http:
@@ -106,8 +52,10 @@ functions:
           cors: true
           authorizer: aws_iam
   disableUser:
+    role: DropBucketDisableUserRole
     handler: user.disable
   clamScan:
+    role: DropBucketVirusScanRole
     timeout: 600
     memory: 3008
     optimize:
@@ -121,9 +69,10 @@ functions:
         - av/bin/libpcre2-posix.so.1
         - av/bin/libltdl.so.7
     handler: clam.scan
-    # events:
-    #   - s3: files
-  av_defs_updater:
+    # Note: no event associated here, we do it from the bucket definition to overcome limitations
+    # of serverless deployment mechanism...
+  avDefsUpdater:
+    role: DropBucketVirusDefsRole
     timeout: 600
     optimize:
       includePaths:
@@ -142,6 +91,7 @@ functions:
 
 resources:
   - ${file(resources/general.yml)}
+  - ${file(resources/iam-roles.yml)}
   - ${file(resources/s3-bucket.yml)}
   - ${file(resources/cognito-user-pool.yml)}
   - ${file(resources/cognito-identity-pool.yml)}

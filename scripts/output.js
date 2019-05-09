@@ -5,10 +5,10 @@ const fs = require('fs');
 
 const cwd = proc.cwd();
 
-function setSSMParam(data) {
-  console.log('Setting SSM parameters');
-  console.log(cp.execSync(`/usr/local/bin/aws ssm put-parameter --name "/ctrl-alt-del/drop-bucket/COGNITO_IDENTITY_POOL_ID" --value "${data.IdentityPoolId}" --region ${data.DeploymentRegion} --profile ${data.DeploymentAwsProfile} --type String --overwrite`).toString());
-}
+// function setSSMParam(data) {
+//   console.log('Setting SSM parameters');
+//   console.log(cp.execSync(`/usr/local/bin/aws ssm put-parameter --name "/ctrl-alt-del/drop-bucket/COGNITO_IDENTITY_POOL_ID" --value "${data.IdentityPoolId}" --region ${data.DeploymentRegion} --profile ${data.DeploymentAwsProfile} --type String --overwrite`).toString());
+// }
 
 function buildClientUI() {
   console.log('Building client UI');
@@ -37,7 +37,7 @@ function deployClient(data) {
 }
 
 function process(data) {
-  setSSMParam(data);
+  // setSSMParam(data);
   writeConfig(data);
   buildClientUI();
   deployClient(data);

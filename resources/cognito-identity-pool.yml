@@ -76,14 +76,14 @@ Resources:
                   - Fn::Join:
                     - ''
                     -
-                      - Fn::GetAtt: [S3BucketFiles, Arn]
+                      - "arn:aws:s3:::${self:custom.fileBucketName}"
                       - '/private/'
                       - '$'
                       - '{cognito-identity.amazonaws.com:sub}/*'
                   - Fn::Join:
                     - ''
                     -
-                      - Fn::GetAtt: [S3BucketFiles, Arn]
+                      - "arn:aws:s3:::${self:custom.fileBucketName}"
                       - '/private/'
                       - '$'
                       - '{cognito-identity.amazonaws.com:sub}'

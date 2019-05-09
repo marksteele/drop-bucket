@@ -1,6 +1,7 @@
 Resources:
   S3BucketFiles:
-    # DependsOn: S3BucketFilesLambdaPermission
+    DependsOn: 
+      - ClamScanLambdaFunction
     Type: AWS::S3::Bucket
     Properties:
       BucketName:  ${self:custom.fileBucketName}
@@ -28,13 +29,10 @@ Resources:
             ExposedHeaders:
               - ETag
             MaxAge: 3000
-      # NotificationConfiguration:
-      #   LambdaConfigurations:
-      #   - Event: 's3:ObjectCreated:*'
-      #     Function: 
-      #       "Fn::GetAtt":
-      #         - ClamScanLambdaFunction
-      #         - Arn
+      NotificationConfiguration:
+        LambdaConfigurations:
+        - Event: 's3:ObjectCreated:*'
+          Function: "Fn::GetAtt": [ ClamScanLambdaFunction, Arn ]
   VirusDefsBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -62,12 +60,7 @@ Resources:
           Effect: Deny
           Principal: "*"
           Action: s3:PutObject
-          Resource:
-            Fn::Join:
-            - ''
-            - - 'arn:aws:s3:::'
-              - Ref: S3BucketFiles
-              - "/*"
+          Resource: "arn:aws:s3:::${self:custom.fileBucketName}/*"
           Condition:
             StringNotEquals:
               s3:x-amz-server-side-encryption: AES256
@@ -77,27 +70,22 @@ Resources:
           Action:
             - s3:GetObject
             - s3:PutObjectTagging
-          Resource:
-            Fn::Join:
-            - ''
-            - - 'arn:aws:s3:::'
-              - Ref: S3BucketFiles
-              - "/*"
+          Resource: "arn:aws:s3:::${self:custom.fileBucketName}/*"
           Condition:
             StringEquals:
               "s3:ExistingObjectTag/virusScanStatus": "INFECTED"
-  # S3BucketFilesLambdaPermission:
-  #     Type: "AWS::Lambda::Permission"
-  #     Properties:
-  #       FunctionName:
-  #         "Fn::GetAtt":
-  #           - ClamScanLambdaFunction
-  #           - Arn
-  #       Principal: "s3.amazonaws.com"
-  #       Action: "lambda:InvokeFunction"
-  #       SourceAccount:
-  #         Ref: AWS::AccountId
-  #       SourceArn: "arn:aws:s3:::${self:custom.fileBucketName}"
+  S3BucketFilesLambdaPermission:
+      Type: "AWS::Lambda::Permission"
+      Properties:
+        FunctionName:
+          "Fn::GetAtt":
+            - ClamScanLambdaFunction
+            - Arn
+        Principal: "s3.amazonaws.com"
+        Action: "lambda:InvokeFunction"
+        SourceAccount:
+          Ref: AWS::AccountId
+        SourceArn: "arn:aws:s3:::${self:custom.fileBucketName}"
 
 Outputs:
   FileBucketName:

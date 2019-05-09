@@ -1,6 +1,5 @@
 Resources:
   CognitoUserPool:
-    # DependsOn: DisableUserLambdaFunction
     Type: AWS::Cognito::UserPool
     Properties:
       UserPoolName: ${self:custom.cognitoUserPool}
@@ -29,9 +28,6 @@ Resources:
         - ADMIN_NO_SRP_AUTH
       GenerateSecret: false
   UserPoolLambdaInvokePermission:
-    DependsOn: 
-      - CognitoUserPool
-      - DisableUserLambdaFunction
     Type: AWS::Lambda::Permission
     Properties:
       Action: lambda:invokeFunction
