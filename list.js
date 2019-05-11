@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 const ListService = require('./lib/list-service.js');
+const UserService = require('./lib/user-service.js');
 
 module.exports.list = (e, ctx, cb) => {
   if (!e.requestContext.identity.cognitoIdentityId) {
@@ -14,7 +15,12 @@ module.exports.list = (e, ctx, cb) => {
     return;
   }
   const ls = new ListService();
-  ls.listFiles(`private/${e.requestContext.identity.cognitoIdentityId}/`)
+  const us = new UserService();
+  const cognitoId = e.requestContext.identity.cognitoAuthenticationProvider.replace(/.*?:[^:]+$/, '');
+  console.log(`CognitoId: ${cognitoId}`);
+  us.getUserInfo(cognitoId).then(user => {
+    console.log(user);
+    ls.listFiles(`private/${e.requestContext.identity.cognitoIdentityId}/`)
     .then(files => cb(null, {
       statusCode: 200,
       headers: {
@@ -34,4 +40,6 @@ module.exports.list = (e, ctx, cb) => {
         body: err.message,
       });
     });
+  });
+
 };

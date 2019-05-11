@@ -27,9 +27,6 @@
     "test": "IS_TEST=1 mocha",
     "coverage": "IS_TEST=1 nyc --check-coverage --lines 75 --per-file mocha",
     "coverage-report": "IS_TEST=1 nyc --check-coverage --report -r html mocha",
-    "lint": "eslint --ignore-path .gitignore .",
-    "deploy-client": "sls client deploy -s dev --no-confirm --aws-profile ctrl-alt-del --region us-east-1",
-    "build-client": "cd client && npm run build && cd ..",
-    "deploy": "sls deploy -s dev --region us-east-1 --aws-profile ctrl-alt-del"
+    "lint": "eslint --ignore-path .gitignore ."
   }
 }

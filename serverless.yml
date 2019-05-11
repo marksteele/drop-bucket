@@ -54,7 +54,7 @@ functions:
   disableUser:
     role: DropBucketDisableUserRole
     handler: user.disable
-  clamScan:
+  scan:
     role: DropBucketVirusScanRole
     timeout: 600
     memory: 3008

@@ -17,8 +17,11 @@ Resources:
         - The DropBucket Team
       EmailVerificationSubject: "Verify your DropBucket account"
       LambdaConfig:
-        PostConfirmation: "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage, self:provider.stage}-disableUser"
-  CognitoUserPoolClient:
+        PostConfirmation: 
+          "Fn::GetAtt":
+            - DisableUserLambdaFunction
+            - Arn
+  CognitoUserPoolClient:  
     Type: AWS::Cognito::UserPoolClient
     Properties:
       ClientName: ${self:custom.stage}-user-pool-client
@@ -32,7 +35,10 @@ Resources:
     Properties:
       Action: lambda:invokeFunction
       Principal: cognito-idp.amazonaws.com
-      FunctionName: "${self:service}-${opt:stage, self:provider.stage}-disableUser"
+      FunctionName: 
+        "Fn::GetAtt":
+          - DisableUserLambdaFunction
+          - Arn
       SourceArn: "arn:aws:cognito-idp:#{AWS::Region}:#{AWS::AccountId}:userpool/*"
 
 # Print out the Id of the User Pool that is created

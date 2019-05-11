@@ -1,7 +1,5 @@
 Resources:
   S3BucketFiles:
-    DependsOn: 
-      - ClamScanLambdaFunction
     Type: AWS::S3::Bucket
     Properties:
       BucketName:  ${self:custom.fileBucketName}
@@ -32,7 +30,10 @@ Resources:
       NotificationConfiguration:
         LambdaConfigurations:
         - Event: 's3:ObjectCreated:*'
-          Function: "Fn::GetAtt": [ ClamScanLambdaFunction, Arn ]
+          Function: 
+            "Fn::GetAtt":
+              - ScanLambdaFunction
+              - Arn
   VirusDefsBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -79,7 +80,7 @@ Resources:
       Properties:
         FunctionName:
           "Fn::GetAtt":
-            - ClamScanLambdaFunction
+            - ScanLambdaFunction
             - Arn
         Principal: "s3.amazonaws.com"
         Action: "lambda:InvokeFunction"

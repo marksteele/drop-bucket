@@ -129,6 +129,8 @@ Resources:
           Ref: "DropBucketShareRole"
         -
           Ref: "DropBucketDisableUserRole"
+        -
+          Ref: "DropBucketListRole"
 
   DropBucketListRole:
     Type: AWS::IAM::Role

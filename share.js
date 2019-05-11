@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 const ShareService = require('./lib/share-service.js');
+const UserService = require('./lib/user-service.js');
 
 
 module.exports.shareFile = (e, ctx, cb) => {
@@ -14,26 +15,14 @@ module.exports.shareFile = (e, ctx, cb) => {
     });
     return;
   }
+  const us = new UserService();
   const ss = new ShareService();
-  
-  // ls.listFiles(`private/${e.requestContext.identity.cognitoIdentityId}/`)
-  //   .then(files => cb(null, {
-  //     statusCode: 200,
-  //     headers: {
-  //       'Access-Control-Allow-Origin': '*',
-  //       'Access-Control-Allow-Credentials': true,
-  //     },
-  //     body: JSON.stringify(files),
-  //   }))
-  //   .catch((err) => {
-  //     console.log(err);
-  //     cb(null, {
-  //       statusCode: err.code || 500,
-  //       headers: {
-  //         'Access-Control-Allow-Origin': '*',
-  //         'Access-Control-Allow-Credentials': true,
-  //       },
-  //       body: err.message,
-  //     });
-  //   });
+  const req = JSON.parse(e.body);
+  const cognitoId = e.requestContext.identity.cognitoAuthenticationProvider.replace(/.*?:[^:]+$/, '');
+  us.getUserInfo(cognitoId)
+    .then(user => ss.shareFile(`private/${e.requestContext.identity.cognitoIdentityId}/${req.filePath}`, user.UserAttributes.Email, req.to))
+    .then((shareId) => {
+      console.log(shareId);
+      cb(null, shareId);
+    });
 };
