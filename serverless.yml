@@ -36,7 +36,8 @@ provider:
     DYNAMODB_TABLE_NAME: ${self:custom.dynamoDbTableName}
     DYNAMODB_TABLE_TO_IDX: ${self:custom.stage}-${self:service}-shared-files-to-idx
     DYNAMODB_TABLE_FROM_IDX: ${self:custom.stage}-${self:service}-shared-files-from-idx
-    COGNITO_IDENTITY_POOL_ID: "/ctrl-alt-del/drop-bucket/COGNITO_IDENTITY_POOL_ID"
+    COGNITO_IDENTITY_POOL_ID: "/ctrl-alt-del/${self:service}/${self:custom.stage}/COGNITO_IDENTITY_POOL_ID"
+    COGNITO_USER_POOL_ID: "/ctrl-alt-del/${self:service}/${self:custom.stage}/COGNITO_USER_POOL_ID"
     ADMIN_EMAIL: "mark@control-alt-del.org"
     WEBSITE_URL: "https://dropbucket.control-alt-del.org"
     SHARE_PATH: "/share"
@@ -47,8 +48,17 @@ functions:
     handler: list.list
     events:
       - http:
-          path: /
+          path: /list
           method: get
+          cors: true
+          authorizer: aws_iam
+  share:
+    role: DropBucketShareRole
+    handler: share.shareFile
+    events:
+      - http:
+          path: /share
+          method: post
           cors: true
           authorizer: aws_iam
   disableUser:

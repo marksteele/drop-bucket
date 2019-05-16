@@ -23,7 +23,12 @@ Amplify.configure({
   API: {
     endpoints: [
       {
-        name: "files",
+        name: "listFiles",
+        endpoint: config.apiGateway.URL,
+        region: config.apiGateway.REGION
+      },
+      {
+        name: "shareFile",
         endpoint: config.apiGateway.URL,
         region: config.apiGateway.REGION
       },

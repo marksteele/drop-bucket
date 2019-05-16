@@ -31,6 +31,24 @@ Resources:
           Ref: "DropBucketShareRole"
         - 
           Ref: "DropBucketDisableUserRole"
+  DropBucketSSMPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: DropBucketSSMPolicy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Action:
+          - ssm:GetParameter
+          Effect: Allow
+          Resource: "arn:aws:ssm:#{AWS::Region}:#{AWS::AccountId}:parameter/ctrl-alt-del/${self:service}/${self:custom.stage}/*"
+      Roles: 
+        - 
+          Ref: "DropBucketListRole"
+        -
+          Ref: "DropBucketShareRole"
+        - 
+          Ref: "DropBucketDisableUserRole"
   DropBucketFileBucketAccessPolicy:
     Type: AWS::IAM::Policy
     Properties:
@@ -72,7 +90,7 @@ Resources:
         - 
           Ref: "DropBucketVirusScanRole"
         -
-          Ref: "DropBucketVirusScanRole"
+          Ref: "DropBucketVirusDefsRole"
 
   DropBucketDynamoDbAccessPolicy:
     Type: AWS::IAM::Policy
@@ -109,7 +127,8 @@ Resources:
       Roles: 
         - 
           Ref: "DropBucketDisableUserRole"
-
+        -
+          Ref: "DropBucketShareRole"
 
   DropBucketCognitoAccessPolicy:
     Type: AWS::IAM::Policy

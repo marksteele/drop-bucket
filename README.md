@@ -172,6 +172,4 @@ https://serverless-stack.com/
 
 Docs on the process for updating the virus scanning engine.
 
-A better deployment strategy. Can't get the virus scanning bucket hook auto-configured because of circular deps created by serverless on the custom S3 bucket properties. This is a stupid limitation of the framework.
-
-Maybe if I move the IAM perms to the s3 bucket outside of the serverless section into the resources....
+Make object expiration configurable at upload time by creating lifecycle rules that operate on object tags? Seems easy enough...

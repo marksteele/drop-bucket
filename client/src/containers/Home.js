@@ -5,6 +5,7 @@ import {CopyToClipboard} from 'react-copy-to-clipboard';
 import { deleteFile } from "../libs/awsLib";
 import { toast } from 'react-toastify';
 import NewFile from "./NewFile";
+import ShareFile from "./ShareFile";
 
 import "./Home.css";
 
@@ -15,8 +16,31 @@ export default class Home extends Component {
     super(props);
     this.state = {
       isLoading: true,
-      files: []
+      files: [],
+      modalIsOpen: false,
+      emailShareRecipient: '',
+      shareFile: ''
     };
+    this.openModal = this.openModal.bind(this);
+    this.afterOpenModal = this.afterOpenModal.bind(this);
+    this.closeModal = this.closeModal.bind(this);
+  }
+
+  openModal() {
+    this.setState({modalIsOpen: true});
+  }
+
+  afterOpenModal() {
+    // references are now sync'd and can be accessed.
+  }
+
+  closeModal() {
+    this.setState({modalIsOpen: false});
+  }
+
+  handleSubmit(event) {
+    console.log(`Sharing file ${this.state.shareFile} with ${this.state.emailShareRecipient}`);
+    event.preventDefault();
   }
 
   async componentDidMount() {
@@ -33,7 +57,7 @@ export default class Home extends Component {
   }
 
   files() {
-    return API.get("files", "/");
+    return API.get("listFiles", "/list");
   }
 
   refresh = async () => {
@@ -77,9 +101,12 @@ export default class Home extends Component {
                 {`Last modified: ${file.LastModified}`}<br/>
                 {`Size: ${file.Size}`}<br/>
                 <button onClick={ this.delete.bind(this, file.Key) }>Delete</button>
-                {file.Tags.virusScanStatus === 'CLEAN' ? (<span>
-                <a href={file.Url} target='_new' style={{textDecoration: 'none', 'color': 'black'}}><button>Download</button></a> 
-                <CopyToClipboard text={file.Url}><button>Copy sharing link</button></CopyToClipboard></span>
+                {file.Tags.virusScanStatus === 'CLEAN' ? (
+                <span>
+                  <a href={file.Url} target='_new' style={{textDecoration: 'none', 'color': 'black'}}><button>Download</button></a> 
+                  <CopyToClipboard text={file.Url}><button>Copy sharing link</button></CopyToClipboard>              
+                  <ShareFile shareFile={file.Key} />
+                </span>
                 ) : (<span></span>)}
               </ListGroupItem>
     );

@@ -2,7 +2,6 @@
 const ShareService = require('./lib/share-service.js');
 const UserService = require('./lib/user-service.js');
 
-
 module.exports.shareFile = (e, ctx, cb) => {
   if (!e.requestContext.identity.cognitoIdentityId) {
     cb(null, {
@@ -17,12 +16,14 @@ module.exports.shareFile = (e, ctx, cb) => {
   }
   const us = new UserService();
   const ss = new ShareService();
+  console.log(e);
   const req = JSON.parse(e.body);
-  const cognitoId = e.requestContext.identity.cognitoAuthenticationProvider.replace(/.*?:[^:]+$/, '');
-  us.getUserInfo(cognitoId)
-    .then(user => ss.shareFile(`private/${e.requestContext.identity.cognitoIdentityId}/${req.filePath}`, user.UserAttributes.Email, req.to))
+  console.log(req);
+  const cognitoId = e.requestContext.identity.cognitoAuthenticationProvider.replace(/.*CognitoSignIn:/, '');
+  console.log(`CognitoId: ${cognitoId}`);
+  us.getUserInfo(cognitoId).then(user => ss.shareFile(`private/${e.requestContext.identity.cognitoIdentityId}/${req.filePath}`, user.email, req.to))
     .then((shareId) => {
       console.log(shareId);
-      cb(null, shareId);
+      cb(null, JSON.stringify({ status: 'ok', shareId }));
     });
 };
