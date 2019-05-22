@@ -33,7 +33,7 @@ export default class ShareFile extends Component {
   }
 
   shareFile(filePath, to) {
-    return API.post("shareFile", "/share", { body: { filePath, to } });
+    return API.post("api", "/share", { body: { filePath, to } });
   }
 
   async handleSubmit(event) {

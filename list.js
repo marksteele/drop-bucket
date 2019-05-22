@@ -13,6 +13,7 @@ module.exports.list = (e, ctx, cb) => {
     });
     return;
   }
+  
   const ls = new ListService();
   ls.listFiles(`private/${e.requestContext.identity.cognitoIdentityId}/`)
     .then(files => cb(null, {

@@ -108,7 +108,9 @@ Resources:
           - dynamodb:DeleteItem
           Effect: Allow
           Resource: 
-            - "Fn::GetAtt": [ FileSharingTable, Arn ]
+            - Fn::GetAtt: [ FileSharingTable, Arn ]
+            - Fn::Join: [ "/", [ Fn::GetAtt: ["FileSharingTable", "Arn" ], "index", "${self:custom.dynamoDbTableToIdx}" ]]
+            - Fn::Join: [ "/", [ Fn::GetAtt: ["FileSharingTable", "Arn" ], "index", "${self:custom.dynamoDbTableFromIdx}" ]]
       Roles: 
         - 
           Ref: "DropBucketShareRole"

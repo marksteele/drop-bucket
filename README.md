@@ -173,3 +173,4 @@ https://serverless-stack.com/
 Docs on the process for updating the virus scanning engine.
 
 Make object expiration configurable at upload time by creating lifecycle rules that operate on object tags? Seems easy enough...
+

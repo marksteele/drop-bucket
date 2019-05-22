@@ -4,8 +4,8 @@ plugins:
   - serverless-offline
   - serverless-finch # static site to s3 deployment
   - serverless-plugin-optimize
-  - serverless-stack-output
   - serverless-pseudo-parameters
+  - serverless-stack-output
 
 package:
   individually: true
@@ -34,13 +34,13 @@ provider:
     CLAMAV_BUCKET_NAME: ${self:custom.avDefsBucketName}
     FILE_BUCKET_NAME: ${self:custom.fileBucketName}
     DYNAMODB_TABLE_NAME: ${self:custom.dynamoDbTableName}
-    DYNAMODB_TABLE_TO_IDX: ${self:custom.stage}-${self:service}-shared-files-to-idx
-    DYNAMODB_TABLE_FROM_IDX: ${self:custom.stage}-${self:service}-shared-files-from-idx
+    DYNAMODB_TABLE_TO_IDX: ${self:custom.dynamoDbTableToIdx}
+    DYNAMODB_TABLE_FROM_IDX: ${self:custom.dynamoDbTableFromIdx}
     COGNITO_IDENTITY_POOL_ID: "/ctrl-alt-del/${self:service}/${self:custom.stage}/COGNITO_IDENTITY_POOL_ID"
     COGNITO_USER_POOL_ID: "/ctrl-alt-del/${self:service}/${self:custom.stage}/COGNITO_USER_POOL_ID"
     ADMIN_EMAIL: "mark@control-alt-del.org"
     WEBSITE_URL: "https://dropbucket.control-alt-del.org"
-    SHARE_PATH: "/share"
+    SHARE_PATH: "/shareLink"
 
 functions:
   list:
@@ -61,6 +61,47 @@ functions:
           method: post
           cors: true
           authorizer: aws_iam
+  deleteShare:
+    role: DropBucketShareRole
+    handler: share.deleteShare
+    events:
+      - http:
+          path: /share/{type}/{id}
+          method: delete
+          cors: true
+          authorizer: aws_iam
+          request:
+            parameters:
+              paths:
+                type: true
+                id: true
+  listShared:
+    role: DropBucketShareRole
+    handler: share.listShared
+    events:
+      - http:
+          path: /share/{type}
+          method: get
+          cors: true
+          authorizer: aws_iam
+          request:
+            parameters:
+              paths:
+                type: true
+  shareLink:
+    role: DropBucketShareRole
+    handler: share.shareLink
+    events:
+      - http:
+          path: /shareLink/{id}
+          method: get
+          cors: true
+          authorizer: aws_iam
+          request:
+            parameters:
+              paths:
+                id: true
+                              
   disableUser:
     role: DropBucketDisableUserRole
     handler: user.disable

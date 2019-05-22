@@ -11,7 +11,6 @@ import "./NewFile.css";
 export default class NewFile extends Component {
   constructor(props) {
     super(props);
-    this.refresh = props.refresh;
     this.state = {
       isLoading: true,
     };
@@ -40,14 +39,12 @@ export default class NewFile extends Component {
         position: toast.POSITION.TOP_CENTER
       });
       this.setState({ isLoading: false });
-      this.refresh();
     }).catch(e => { 
       console.log(e);
       toast.error('💩 - One or more errors occurred while uploading files. Please try again.', {
         position: toast.POSITION.TOP_CENTER
       });
       this.setState({ isLoading: false });
-      this.refresh();
     });
   }
 

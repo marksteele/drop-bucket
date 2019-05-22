@@ -6,9 +6,9 @@ Resources:
       AttributeDefinitions:
       - AttributeName: shareId
         AttributeType: S
-      - AttributeName: to
+      - AttributeName: email_to
         AttributeType: S
-      - AttributeName: from
+      - AttributeName: email_from
         AttributeType: S
       KeySchema:
       - AttributeName: shareId
@@ -18,7 +18,7 @@ Resources:
         Projection: 
           ProjectionType: ALL
         KeySchema:
-        - AttributeName: to
+        - AttributeName: email_to
           KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
@@ -27,7 +27,7 @@ Resources:
         Projection: 
           ProjectionType: ALL
         KeySchema:
-        - AttributeName: from
+        - AttributeName: email_from
           KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
