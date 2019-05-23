@@ -1,3 +1,5 @@
+# Change this to something that suits you (eg: my-filesharing-service)
+# Note that there's a length limit due to s3 bucket names, keep it short.
 service: drop-bucket
 
 plugins:
@@ -38,9 +40,8 @@ provider:
     DYNAMODB_TABLE_FROM_IDX: ${self:custom.dynamoDbTableFromIdx}
     COGNITO_IDENTITY_POOL_ID: "/ctrl-alt-del/${self:service}/${self:custom.stage}/COGNITO_IDENTITY_POOL_ID"
     COGNITO_USER_POOL_ID: "/ctrl-alt-del/${self:service}/${self:custom.stage}/COGNITO_USER_POOL_ID"
-    ADMIN_EMAIL: "mark@control-alt-del.org"
-    WEBSITE_URL: "https://dropbucket.control-alt-del.org"
-    SHARE_PATH: "/shareLink"
+    ADMIN_EMAIL: "mark@control-alt-del.org" ## CHANGE ME
+    WEBSITE_URL: "https://dropbucket.control-alt-del.org" ## CHANGE ME
 
 functions:
   list:

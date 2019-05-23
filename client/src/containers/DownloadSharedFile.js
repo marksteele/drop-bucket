@@ -2,25 +2,28 @@ import React, { Component } from "react";
 import { createWriteStream, supported } from 'streamsaver'
 import { API } from "aws-amplify";
 
-export default class SharedWithMe extends Component {
+export default class DownloadSharedFile extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      isLoading: true,
       shareId: this.props.shareId,
       fileName: this.props.fileName,
+      getUrl: this.props.getUrl,
       supported,
       download: {}
     };
   }
 
-  async getDownloadLink() {
-    const download = await API.get("api", `/shareLink/${this.state.shareId}`);
-    return download.url;
+  componentDidMount() {
+    API.get("api", `/shareLink/${this.state.shareId}`)
+      .then(({url}) => {
+        this.setState({url, isLoading: false});
+      });
   }
 
   async downloadFile() {
-    return API.get("api", `/shareLink/${this.state.shareId}`)
-    .then((download) => fetch(download.url)
+    return fetch(this.state.url)
     .then(res => {
       const fileStream = createWriteStream(this.state.fileName);
       const writer = fileStream.getWriter()
@@ -37,15 +40,15 @@ export default class SharedWithMe extends Component {
       pump().then(() => {
         console.log('Closed the stream, Done writing');
       });
-    }));
+    });
   }
 
   render() {
     let button;
     if (!supported) {
-      button = <a href={this.getDownloadLink()} download target="_blank"><button>Download</button></a>;
+      button = <a href={this.state.url} disabled={this.state.isLoading} download target="_blank"><button>Download</button></a>;
     } else {
-      button = <button onClick={this.downloadFile.bind(this)}>Download</button>;
+      button = <button disabled={this.state.isLoading} onClick={this.downloadFile.bind(this)}>Download</button>;
     }
     return (
       button

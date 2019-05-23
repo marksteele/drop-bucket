@@ -3,6 +3,17 @@ import Modal from 'react-modal';
 import { toast } from 'react-toastify';
 import { API } from "aws-amplify";
 
+const customStyles = {
+  content : {
+    top                   : '50%',
+    left                  : '50%',
+    right                 : 'auto',
+    bottom                : 'auto',
+    marginRight           : '-50%',
+    transform             : 'translate(-50%, -50%)'
+  }
+};
+
 export default class ShareFile extends Component {
   constructor(props) {
     super(props);
@@ -58,12 +69,14 @@ export default class ShareFile extends Component {
                 isOpen={this.state.modalIsOpen}
                 onAfterOpen={this.afterOpenModal}
                 onRequestClose={this.closeModal}
+                style={customStyles}
                 contentLabel="Share file with...">
                 <form onSubmit={this.handleSubmit.bind(this)}>
                   <label> Recipient email:
                     <input type="text" value={this.state.emailShareRecipient} onChange={this.handleChange.bind(this)}/>
                   </label>
-                  <input type="submit" value="Submit" />
+                  <input type="submit" value="Share" />
+                  <button onClick={this.closeModal}>Cancel</button>
               </form>                
       </Modal>
       </>

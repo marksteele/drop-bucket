@@ -5,6 +5,7 @@ import {CopyToClipboard} from 'react-copy-to-clipboard';
 import { deleteFile } from "../libs/awsLib";
 import { toast } from 'react-toastify';
 import ShareFile from "./ShareFile";
+import DownloadFile from "./DownloadFile";
 
 import "./MyFiles.css";
 
@@ -13,26 +14,8 @@ export default class MyFiles extends Component {
     super(props);
     this.state = {
       isLoading: true,
-      files: [],
-      modalIsOpen: false,
-      emailShareRecipient: '',
-      shareFile: ''
+      files: []
     };
-    this.openModal = this.openModal.bind(this);
-    this.afterOpenModal = this.afterOpenModal.bind(this);
-    this.closeModal = this.closeModal.bind(this);
-  }
-
-  openModal() {
-    this.setState({modalIsOpen: true});
-  }
-
-  afterOpenModal() {
-    // references are now sync'd and can be accessed.
-  }
-
-  closeModal() {
-    this.setState({modalIsOpen: false});
   }
 
   handleSubmit(event) {
@@ -101,7 +84,7 @@ export default class MyFiles extends Component {
                   <button onClick={ this.delete.bind(this, file.Key) }>Delete</button>
                   {file.Tags.virusScanStatus === 'CLEAN' ? (
                   <span>
-                    <a href={file.Url} target='_new' style={{textDecoration: 'none', 'color': 'black'}}><button>Download</button></a> 
+                    <DownloadFile url={file.Url} fileName={file.Key} />
                     <CopyToClipboard text={file.Url}><button>Copy sharing link</button></CopyToClipboard>              
                     <ShareFile shareFile={file.Key} />
                   </span>

@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { API } from "aws-amplify";
 import { PageHeader, ListGroup, ListGroupItem } from "react-bootstrap";
 import { toast } from 'react-toastify';
-import Download from "./Download";
+import DownloadSharedFile from "./DownloadSharedFile";
 
 import "./SharedWithMe.css";
 
@@ -71,10 +71,6 @@ export default class SharedWithMe extends Component {
     this.setState({ isLoading: false });
   };
 
-  async getShareLink(shareId) {
-
-  }
-
   renderFilesList(files) {
     if (files.length) {
       return files.map(
@@ -82,7 +78,7 @@ export default class SharedWithMe extends Component {
                 <ListGroupItem key={i}>
                   {`File name:  ${file.filePath}`}<br/>
                   {`Shared from: ${file.email_from}`}<br/>
-                  <Download shareId={ file.shareId} fileName={file.filePath} />
+                  <DownloadSharedFile shareId={ file.shareId} fileName={file.filePath} />
                   <button onClick={ this.delete.bind(this,  file.shareId) }>Delete</button><br/>
                 </ListGroupItem>
       );
