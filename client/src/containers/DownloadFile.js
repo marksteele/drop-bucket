@@ -35,7 +35,7 @@ export default class DownloadFile extends Component {
   render() {
     let button;
     if (!supported) {
-      button = <a href={this.state.url} download target="_blank"><button>Download</button></a>;
+      button = <button onClick={() => window.open(this.state.url)}>Download</button>;
     } else {
       button = <button onClick={this.downloadFile.bind(this)}>Download</button>;
     }

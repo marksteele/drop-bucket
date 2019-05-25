@@ -6,24 +6,22 @@ export default class DownloadSharedFile extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      isLoading: true,
       shareId: this.props.shareId,
       fileName: this.props.fileName,
-      getUrl: this.props.getUrl,
+      url: '',
       supported,
       download: {}
     };
   }
 
-  componentDidMount() {
-    API.get("api", `/shareLink/${this.state.shareId}`)
-      .then(({url}) => {
-        this.setState({url, isLoading: false});
-      });
+  async redirectLink() {
+    const {url} = await API.get("api", `/shareLink/${this.state.shareId}`);
+    window.open(url);
   }
 
   async downloadFile() {
-    return fetch(this.state.url)
+    return API.get("api", `/shareLink/${this.state.shareId}`)
+    .then(({url}) => fetch(url)
     .then(res => {
       const fileStream = createWriteStream(this.state.fileName);
       const writer = fileStream.getWriter()
@@ -31,7 +29,7 @@ export default class DownloadSharedFile extends Component {
         writer.releaseLock()
         return res.body.pipeTo(fileStream)
       }
-      const reader = res.body.getReader()
+      const reader = res.body.getReader();
       const pump = () => reader.read()
         .then(({ value, done }) => done ? writer.close() : writer.write(value)
         .then(pump));
@@ -40,15 +38,15 @@ export default class DownloadSharedFile extends Component {
       pump().then(() => {
         console.log('Closed the stream, Done writing');
       });
-    });
+    }));
   }
 
   render() {
     let button;
     if (!supported) {
-      button = <a href={this.state.url} disabled={this.state.isLoading} download target="_blank"><button>Download</button></a>;
+      button = <button onClick={this.redirectLink.bind(this)}>Download</button>;
     } else {
-      button = <button disabled={this.state.isLoading} onClick={this.downloadFile.bind(this)}>Download</button>;
+      button = <button onClick={this.downloadFile.bind(this)}>Download</button>;
     }
     return (
       button
