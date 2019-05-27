@@ -8,13 +8,10 @@ Resources:
       AutoVerifiedAttributes:
         - email
       EmailVerificationMessage: |
-        Welcome to DropBucket! 
-
-        Please enter the verification code: {####}
-
-        Note: Your account will be disabled until an administrator enables it.
-
-        - The DropBucket Team
+        Welcome to DropBucket!<br><br>
+        Please enter the verification code: <b>{####}</b><br><br>
+        Note: Your account will be disabled until an administrator enables it.<br><br>
+        - The DropBucket Team<br>
       EmailVerificationSubject: "Verify your DropBucket account"
       LambdaConfig:
         PostConfirmation: 
