@@ -6,6 +6,7 @@ import { deleteFile } from "../libs/awsLib";
 import { toast } from 'react-toastify';
 import ShareFile from "./ShareFile";
 import DownloadFile from "./DownloadFile";
+import LoadingOverlay from 'react-loading-overlay';
 
 import "./MyFiles.css";
 
@@ -93,7 +94,7 @@ export default class MyFiles extends Component {
       );
     } else {
       return (
-        <p>Nothing shared yet!</p>
+        <p style="min-height: '500px'">Nothing shared yet!</p>
       );
     }
   }
@@ -104,11 +105,21 @@ export default class MyFiles extends Component {
       <div className="MyFiles">
         <div className="files">
           <PageHeader>Your Files <img height="30" alt="refresh" src="/refresh.png" onClick={this.refresh} /></PageHeader>
+          <LoadingOverlay active={this.state.isLoading} spinner text="Retrieving file list" styles={{
+        overlay: (base) => ({
+          ...base,
+          background: 'rgba(0, 0, 0, 0.9)'
+          
+        })
+      }} >
           <ListGroup>
             {!this.state.isLoading && this.renderFilesList(this.state.files)}
           </ListGroup>
+        </LoadingOverlay>
+
       </div>
       </div>
+
       </>
     );
   }

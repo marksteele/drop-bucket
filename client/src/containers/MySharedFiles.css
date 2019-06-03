@@ -10,3 +10,7 @@
 .MySharedFiles .files p {
   color: #666;
 }
+
+.MySharedFiles {
+  min-height: 500px;
+}

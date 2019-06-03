@@ -10,3 +10,7 @@
 .SharedWithMe .files p {
   color: #666;
 }
+
+.SharedWithMe {
+  min-height: 500px;
+}

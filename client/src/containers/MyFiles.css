@@ -10,3 +10,7 @@
 .MyFiles .files p {
   color: #666;
 }
+
+.MyFiles {
+  min-height: 500px;
+}

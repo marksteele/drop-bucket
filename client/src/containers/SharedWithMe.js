@@ -3,6 +3,7 @@ import { API } from "aws-amplify";
 import { PageHeader, ListGroup, ListGroupItem } from "react-bootstrap";
 import { toast } from 'react-toastify';
 import DownloadSharedFile from "./DownloadSharedFile";
+import LoadingOverlay from 'react-loading-overlay';
 
 import "./SharedWithMe.css";
 
@@ -96,9 +97,17 @@ export default class SharedWithMe extends Component {
       <div className="MySharedFiles">
         <div className="files">
         <PageHeader>Files shared with you <img height="30" alt="refresh" src="/refresh.png" onClick={this.refresh} /></PageHeader>
+        <LoadingOverlay active={this.state.isLoading} spinner text="Retrieving file list" styles={{
+        overlay: (base) => ({
+          ...base,
+          background: 'rgba(0, 0, 0, 0.9)'
+          
+        })
+      }} >
           <ListGroup>
             {!this.state.isLoading && this.renderFilesList(this.state.files)}
           </ListGroup>
+          </LoadingOverlay>
       </div>
       </div>
       </>
