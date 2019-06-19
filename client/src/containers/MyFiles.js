@@ -94,7 +94,7 @@ export default class MyFiles extends Component {
       );
     } else {
       return (
-        <p style="min-height: '500px'">Nothing shared yet!</p>
+        <p style={{"min-height": '500px'}}>Nothing shared yet!</p>
       );
     }
   }

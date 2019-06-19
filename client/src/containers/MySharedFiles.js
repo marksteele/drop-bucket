@@ -83,7 +83,7 @@ export default class MySharedFiles extends Component {
       );
     } else {
       return (
-        <p>Nothing shared yet!</p>
+        <p style={{"min-height": '500px'}}>Nothing shared yet!</p>
       );
     }
 

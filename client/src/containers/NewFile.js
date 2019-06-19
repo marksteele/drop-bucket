@@ -61,17 +61,16 @@ export default class NewFile extends Component {
     });
     this.setState({isUploading: true, progress: newList});
     return Promise.all(promises).then(() => {
-      this.setState({isUploading: false});
       toast.success("File(s) uploaded successfully!", {
         position: toast.POSITION.TOP_CENTER
       });
-      this.setState({ isLoading: false ,progress: []});
+      this.setState({ isUploading: false, isLoading: false ,progress: []});
     }).catch(e => { 
       console.log(e);
       toast.error('💩 - One or more errors occurred while uploading files. Please try again.', {
         position: toast.POSITION.TOP_CENTER
       });
-      this.setState({ isLoading: false ,progress: []});
+      this.setState({ isUploading: false, isLoading: false ,progress: []});
     });
   }
 
