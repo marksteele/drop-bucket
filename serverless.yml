@@ -1,9 +1,13 @@
+# Change this to something that suits you (eg: my-filesharing-service)
+# Note that there's a length limit due to s3 bucket names, keep it short.
 service: drop-bucket
 
 plugins:
   - serverless-offline
   - serverless-finch # static site to s3 deployment
   - serverless-plugin-optimize
+  - serverless-pseudo-parameters
+  - serverless-stack-output
 
 package:
   individually: true
@@ -11,11 +15,17 @@ package:
 custom:
   stage: ${opt:stage, self:provider.stage}
   client: # for serverless-finch
-    bucketName: ${self:custom.stage}-drop-bucket-ui
+    bucketName: ${self:custom.stage}-${self:service}-ui
     distributionFolder: client/build
     errorDocument: index.html
-  avDefsBucketName: ${self:custom.stage}-drop-bucket-av-defs
-  fileBucketName: ${self:custom.stage}-drop-bucket-files
+  avDefsBucketName: ${self:custom.stage}-${self:service}-av-defs
+  fileBucketName: ${self:custom.stage}-${self:service}-files
+  dynamoDbTableName: ${self:custom.stage}-${self:service}-files
+  dynamoDbTableToIdx: ${self:custom.stage}-${self:service}-files-to-idx
+  dynamoDbTableFromIdx: ${self:custom.stage}-${self:service}-files-from-idx
+  cognitoUserPool: ${self:custom.stage}-user-pool
+  output:
+    handler: scripts/output.process
 
 provider:
   name: aws
@@ -25,34 +35,79 @@ provider:
   environment:
     CLAMAV_BUCKET_NAME: ${self:custom.avDefsBucketName}
     FILE_BUCKET_NAME: ${self:custom.fileBucketName}
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - s3:ListBucket
-      Resource: "arn:aws:s3:::${self:custom.fileBucketName}"
-    - Effect: Allow
-      Action:
-        - s3:*
-      Resource: "arn:aws:s3:::${self:custom.fileBucketName}/*"
-    - Effect: Allow
-      Action:
-        - s3:ListBucket
-      Resource: "arn:aws:s3:::${self:custom.avDefsBucketName}"
-    - Effect: Allow
-      Action:
-        - s3:*
-      Resource: "arn:aws:s3:::${self:custom.avDefsBucketName}/*"
+    DYNAMODB_TABLE_NAME: ${self:custom.dynamoDbTableName}
+    DYNAMODB_TABLE_TO_IDX: ${self:custom.dynamoDbTableToIdx}
+    DYNAMODB_TABLE_FROM_IDX: ${self:custom.dynamoDbTableFromIdx}
+    COGNITO_IDENTITY_POOL_ID: "/ctrl-alt-del/${self:service}/${self:custom.stage}/COGNITO_IDENTITY_POOL_ID"
+    COGNITO_USER_POOL_ID: "/ctrl-alt-del/${self:service}/${self:custom.stage}/COGNITO_USER_POOL_ID"
+    ADMIN_EMAIL: "mark@control-alt-del.org" ## CHANGE ME
+    WEBSITE_URL: "https://dropbucket.control-alt-del.org" ## CHANGE ME
 
 functions:
   list:
+    role: DropBucketListRole
     handler: list.list
     events:
       - http:
-          path: /
+          path: /list
           method: get
           cors: true
           authorizer: aws_iam
-  clam_scan:
+  share:
+    role: DropBucketShareRole
+    handler: share.shareFile
+    events:
+      - http:
+          path: /share
+          method: post
+          cors: true
+          authorizer: aws_iam
+  deleteShare:
+    role: DropBucketShareRole
+    handler: share.deleteShare
+    events:
+      - http:
+          path: /share/{type}/{id}
+          method: delete
+          cors: true
+          authorizer: aws_iam
+          request:
+            parameters:
+              paths:
+                type: true
+                id: true
+  listShared:
+    role: DropBucketShareRole
+    handler: share.listShared
+    events:
+      - http:
+          path: /share/{type}
+          method: get
+          cors: true
+          authorizer: aws_iam
+          request:
+            parameters:
+              paths:
+                type: true
+  shareLink:
+    role: DropBucketShareRole
+    handler: share.shareLink
+    events:
+      - http:
+          path: /shareLink/{id}
+          method: get
+          cors: true
+          authorizer: aws_iam
+          request:
+            parameters:
+              paths:
+                id: true
+                              
+  disableUser:
+    role: DropBucketDisableUserRole
+    handler: user.disable
+  scan:
+    role: DropBucketVirusScanRole
     timeout: 600
     memory: 3008
     optimize:
@@ -66,7 +121,10 @@ functions:
         - av/bin/libpcre2-posix.so.1
         - av/bin/libltdl.so.7
     handler: clam.scan
-  av_defs_updater:
+    # Note: no event associated here, we do it from the bucket definition to overcome limitations
+    # of serverless deployment mechanism...
+  avDefsUpdater:
+    role: DropBucketVirusDefsRole
     timeout: 600
     optimize:
       includePaths:
@@ -84,6 +142,12 @@ functions:
       - schedule: cron(0 12 * * ? *)
 
 resources:
+  - ${file(resources/general.yml)}
+  - ${file(resources/iam-roles.yml)}
   - ${file(resources/s3-bucket.yml)}
   - ${file(resources/cognito-user-pool.yml)}
   - ${file(resources/cognito-identity-pool.yml)}
+  - ${file(resources/dynamodb.yml)}
+
+
+    

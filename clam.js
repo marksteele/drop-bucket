@@ -128,7 +128,7 @@ const scanFile = (bucket, file) => {
 
 const scan = (e, ctx, cb) => {
   const element = e.Records[0];
-  const file = decodeURIComponent(element.s3.object.key.replace(/\+/g," "));
+  const file = decodeURIComponent(element.s3.object.key.replace(/\+/g, ' '));
   if (element.s3.object.size > constants.MAX_FILE_SIZE) {
     tagFile(
       element.s3.bucket.name,

@@ -1,0 +1,219 @@
+Resources:
+  DropBucketCloudWatchLogsPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: DropBucketCloudWatchLogsPolicy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Action:
+          - logs:CreateLogGroup
+          - logs:CreateLogStream
+          - logs:PutLogEvents
+          Effect: Allow
+          Resource: "arn:aws:logs:#{AWS::Region}:#{AWS::AccountId}:log-group:/aws/lambda/*:*:*"
+        - Action:
+          - "s3:PutObject"
+          Effect: Allow
+          Resource:
+            Fn::Join:
+              - ""
+              - - "arn:aws:s3:::"
+                - "Ref" : "ServerlessDeploymentBucket"
+      Roles: 
+        - 
+          Ref: "DropBucketListRole"
+        -
+          Ref: "DropBucketVirusDefsRole"
+        -
+          Ref: "DropBucketVirusScanRole"
+        -
+          Ref: "DropBucketShareRole"
+        - 
+          Ref: "DropBucketDisableUserRole"
+  DropBucketSSMPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: DropBucketSSMPolicy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Action:
+          - ssm:GetParameter
+          Effect: Allow
+          Resource: "arn:aws:ssm:#{AWS::Region}:#{AWS::AccountId}:parameter/ctrl-alt-del/${self:service}/${self:custom.stage}/*"
+      Roles: 
+        - 
+          Ref: "DropBucketListRole"
+        -
+          Ref: "DropBucketShareRole"
+        - 
+          Ref: "DropBucketDisableUserRole"
+  DropBucketFileBucketAccessPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: DropBucketFileBucketAccessPolicy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Action:
+          - s3:ListBucket
+          Effect: Allow
+          Resource: "arn:aws:s3:::${self:custom.fileBucketName}"
+        - Action:
+          - "s3:*"
+          Effect: Allow
+          Resource: "arn:aws:s3:::${self:custom.fileBucketName}/*"
+      Roles: 
+        - 
+          Ref: "DropBucketListRole"
+        -
+          Ref: "DropBucketVirusScanRole"
+        -
+          Ref: "DropBucketShareRole"
+  DropBucketAvDefsBucketAccessPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: DropBucketAvDefsBucketAccessPolicy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Action:
+          - s3:ListBucket
+          Effect: Allow
+          Resource: "arn:aws:s3:::${self:custom.avDefsBucketName}"
+        - Action:
+          - "s3:*"
+          Effect: Allow
+          Resource: "arn:aws:s3:::${self:custom.avDefsBucketName}/*"
+      Roles: 
+        - 
+          Ref: "DropBucketVirusScanRole"
+        -
+          Ref: "DropBucketVirusDefsRole"
+
+  DropBucketDynamoDbAccessPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: DropBucketDynamoDbAccessPolicy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Action:
+          - dynamodb:Query
+          - dynamodb:Scan
+          - dynamodb:GetItem
+          - dynamodb:PutItem
+          - dynamodb:UpdateItem
+          - dynamodb:DeleteItem
+          Effect: Allow
+          Resource: 
+            - Fn::GetAtt: [ FileSharingTable, Arn ]
+            - Fn::Join: [ "/", [ Fn::GetAtt: ["FileSharingTable", "Arn" ], "index", "${self:custom.dynamoDbTableToIdx}" ]]
+            - Fn::Join: [ "/", [ Fn::GetAtt: ["FileSharingTable", "Arn" ], "index", "${self:custom.dynamoDbTableFromIdx}" ]]
+      Roles: 
+        - 
+          Ref: "DropBucketShareRole"
+
+  DropBucketSESAccessPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: DropBucketSESAccessPolicy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Action:
+          - ses:SendEmail
+          Effect: Allow
+          Resource: "*"
+      Roles: 
+        - 
+          Ref: "DropBucketDisableUserRole"
+        -
+          Ref: "DropBucketShareRole"
+
+  DropBucketCognitoAccessPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: DropBucketCognitoAccessPolicy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Action:
+          - cognito-idp:AdminGetUser
+          - cognito-idp:AdminDisableUser
+          Effect: Allow
+          Resource: 
+            - "Fn::GetAtt": [ CognitoUserPool, Arn ]
+      Roles: 
+        - 
+          Ref: "DropBucketShareRole"
+        -
+          Ref: "DropBucketDisableUserRole"
+        -
+          Ref: "DropBucketListRole"
+
+  DropBucketListRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: DropBucketListRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: sts:AssumeRole
+    
+  DropBucketVirusDefsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: DropBucketVirusDefsRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: sts:AssumeRole
+  
+  DropBucketVirusScanRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: DropBucketVirusScanRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: sts:AssumeRole
+
+  DropBucketShareRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: DropBucketShareRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: sts:AssumeRole
+    
+  DropBucketDisableUserRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: DropBucketDisableUserRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: sts:AssumeRole

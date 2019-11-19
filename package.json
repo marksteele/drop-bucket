@@ -6,7 +6,9 @@
   "author": "Mark Steele <mark@control-alt-del.org>",
   "license": "GPL",
   "dependencies": {
-    "moment": "^2.24.0"
+    "moment": "^2.24.0",
+    "streamsaver": "^1.2.0",
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
     "aws-sdk": "^2.12.0",
@@ -14,19 +16,18 @@
     "babel-preset-es2015": "^6.24.1",
     "chai": "^4.2.0",
     "mocha": "^5.2.0",
-    "nyc": "^13.0.1",
+    "nyc": "^14.1.0",
     "serverless-finch": "^2.3.2",
     "serverless-offline": "^3.25.11",
     "serverless-plugin-optimize": "^1.0.0-rc.15",
+    "serverless-pseudo-parameters": "^2.4.0",
+    "serverless-stack-output": "^0.2.3",
     "sinon": "^6.3.4"
   },
   "scripts": {
     "test": "IS_TEST=1 mocha",
     "coverage": "IS_TEST=1 nyc --check-coverage --lines 75 --per-file mocha",
     "coverage-report": "IS_TEST=1 nyc --check-coverage --report -r html mocha",
-    "lint": "eslint --ignore-path .gitignore .",
-    "deploy-client": "sls client deploy -s dev --no-confirm --aws-profile ctrl-alt-del --region us-east-1",
-    "build-client": "cd client && npm run build && cd ..",
-    "deploy": "sls deploy -s dev --region us-east-1 --aws-profile ctrl-alt-del"
+    "lint": "eslint --ignore-path .gitignore ."
   }
 }

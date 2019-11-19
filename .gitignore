@@ -1,4 +1,5 @@
 # Logs
+_optimize
 logs
 *.log
 npm-debug.log*

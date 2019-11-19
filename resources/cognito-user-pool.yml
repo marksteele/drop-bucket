@@ -2,13 +2,23 @@ Resources:
   CognitoUserPool:
     Type: AWS::Cognito::UserPool
     Properties:
-      UserPoolName: ${self:custom.stage}-user-pool
-      UsernameAttributes:
+      UserPoolName: ${self:custom.cognitoUserPool}
+      UsernameAttributes: 
         - email
       AutoVerifiedAttributes:
         - email
-
-  CognitoUserPoolClient:
+      EmailVerificationMessage: |
+        Welcome to DropBucket!<br><br>
+        Please enter the verification code: <b>{####}</b><br><br>
+        Note: Your account will be disabled until an administrator enables it.<br><br>
+        - The DropBucket Team<br>
+      EmailVerificationSubject: "Verify your DropBucket account"
+      LambdaConfig:
+        PostConfirmation: 
+          "Fn::GetAtt":
+            - DisableUserLambdaFunction
+            - Arn
+  CognitoUserPoolClient:  
     Type: AWS::Cognito::UserPoolClient
     Properties:
       ClientName: ${self:custom.stage}-user-pool-client
@@ -17,13 +27,22 @@ Resources:
       ExplicitAuthFlows:
         - ADMIN_NO_SRP_AUTH
       GenerateSecret: false
+  UserPoolLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:invokeFunction
+      Principal: cognito-idp.amazonaws.com
+      FunctionName: 
+        "Fn::GetAtt":
+          - DisableUserLambdaFunction
+          - Arn
+      SourceArn: "arn:aws:cognito-idp:#{AWS::Region}:#{AWS::AccountId}:userpool/*"
 
 # Print out the Id of the User Pool that is created
 Outputs:
   UserPoolId:
     Value:
-      Ref: CognitoUserPool
-
+      "Ref": CognitoUserPool
   UserPoolClientId:
     Value:
       Ref: CognitoUserPoolClient

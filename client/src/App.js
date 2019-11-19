@@ -11,10 +11,25 @@ import 'react-toastify/dist/ReactToastify.min.css';
 import "./App.css";
 
 class App extends Component {
-
+  constructor(props) {
+    super(props);
+    this.state = {
+      loggedInUser: {}
+    };
+  }
   handleLogout = async event => {
     await Auth.signOut();
   }
+
+  async componentDidMount() {
+    try {
+      const user = await Auth.currentUserInfo();
+      this.setState({loggedInUser: user});
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
 
   render() {
     return (
@@ -31,7 +46,7 @@ class App extends Component {
           <Navbar.Collapse>
             <Nav pullRight>
                  <Fragment>
-                    <NavItem onClick={this.handleLogout}>Logout</NavItem>
+                    <NavItem onClick={this.handleLogout}>Logout {this.state.loggedInUser.attributes ? this.state.loggedInUser.attributes.email : ''}</NavItem>
                   </Fragment>
             </Nav>
           </Navbar.Collapse>
@@ -47,4 +62,24 @@ class App extends Component {
   }
 }
 
-export default withAuthenticator(App);
+export default withAuthenticator(App, { signUpConfig: {
+  hideAllDefaults: true,
+  signUpFields: [
+    {
+      label:"Email",
+      key:"username",
+      required: true,
+      displayOrder: 1,
+      type: 'email',
+      custom: false
+    },
+    {
+      label:"Password",
+      key:"password",
+      required: true,
+      displayOrder: 2,
+      type: 'password',
+      custom: false
+    }
+  ]
+}});

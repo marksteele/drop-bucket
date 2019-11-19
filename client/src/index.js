@@ -23,10 +23,10 @@ Amplify.configure({
   API: {
     endpoints: [
       {
-        name: "files",
+        name: "api",
         endpoint: config.apiGateway.URL,
         region: config.apiGateway.REGION
-      },
+      }
     ]
   }
 });

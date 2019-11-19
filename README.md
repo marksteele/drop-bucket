@@ -4,6 +4,20 @@ DropBucket is a self-hosted file sharing tool. It relies on AWS infrastructure f
 
 It's meant to be used to share files with people in a transient way.
 
+## Philosophy
+
+Simple. Fast. Scalable.
+
+## Sharing files
+
+### Public sharing links
+
+There are two ways to share files with DropBucket. The first, is from the 'My files' tab. Clicking on 'Copy sharing link' will copy a direct link to the files which can be shared up to the point where the files are automatically deleted. If you just want to send someone a link and you don't care if they re-share the link, this is the way to go.
+
+### Private sharing links
+
+If you want to force someone to have to sign-up to DropBucket before being able to download things, you can use the 'Share file with...' button on the 'My files' tab. This will prompt for the email address of the person you want to share the file with. They will receive an email invite requesting them to visit the site
+
 ## Use cases
 
 You are security conscious and you need to share files with collegues, but don't want to email them, send them over slack, etc... 
@@ -34,7 +48,7 @@ You get to control which AWS region your files are stored in.
 
 As this is a serverless architecture relying heavily on AWS infrastructure, it could easily scale to millions of users storing petabytes of data without requiring any specific scaling actions (with the possible exception of increasing service limits for API Gateway/Lambda/S3).
 
-The client application is a single-page application, and communicates directly with the S3 API.
+The client application is a single-page application, and communicates with the S3 API, AWS Cognito, API Gateway, and AWS Lambda functions.
 
 ## Limitations
 
@@ -118,18 +132,8 @@ Upload it via the UI. Wait for scan to occur and check object tags, should repor
 
 # Configuration
 
-You'll need to update the `serverless.yml` file and update the bucket configurations in the `custom` section. Ex:
+You'll need to update the `serverless.yml` file and change the service name to something unique. You'll also want to update the ADMIN_EMAIL and WEBSITE_URL to suit your setup. I'm running DropBucket with CloudFront in front of the s3 bucket that contains the single-page application.
 
-```
-custom:
-  stage: ${opt:stage, self:provider.stage}
-  client:
-    bucketName: BUCKET_NAME_FOR_THE_WEB_CLIENT_UI
-    distributionFolder: client/build
-    errorDocument: index.html
-  avDefsBucketName: BUCKET_NAME_FOR_STORING_THE_ANTIVIRUS_DEFINITIONS
-  fileBucketName: BUCKET_NAME_THAT_WILL_STORE_THE_USER_UPLOADED_FILES
-```
 
 # Building the API
 
@@ -138,11 +142,10 @@ sudo npm i serverless -g
 npm i
 ```
 
-# Deploying the infrastructure
+# Deploying
 
-Note: Before attempting to deploy you'll need to have your AWS credentials setup in a configuration profile or as environment variables. AWS has excellent documentation on how to do this.
+Note: Before attempting to deploy you'll need to have your AWS credentials setup in a configuration profile. AWS has excellent documentation on how to do this. The deployment script assumes that you've done this. Trying to deploy without it will fail while trying to deploy the client code.
 
-Customize the serverless.yml to change the bucket names. Once that's done, you can deploy the API and provision all the infrastructure (Cognito user pools, S3 buckets, API Gateway endpoint, and Lambda function) with this command:
 
 ```
 sls deploy -s STAGENAME --region REGION --aws-profile YOURAWSPROFILENAMEIFYOUAREUSINGONE
@@ -154,33 +157,8 @@ ex:
 sls deploy -s dev --region us-east-1 --aws-profile ctrl-alt-del
 ```
 
-# Building the UI
+And there you go, the whole thing has been deployed with a bit of configuration and one command.
 
-The API must be deployed before building the UI, as you'll need to customize the file `client/src/config.js` with your endpoints/cognito pool configuration. 
-
-To get the needed values you'll need to login to the AWS console and find the Cognito pool id, cognito app client id, identity pool id, and API gateway url.
-
-Once that's done:
-
-```
-cd client
-npm run build
-```
-
-## Deploy the UI
-
-(from the project checkout root)
-
-```
-sls client deploy -s STAGENAME --no-confirm --aws-profile YOURAWSPROFILENAMEIFYOUAREUSINGONE --region REGION
-```
-ex:
-
-```
-sls client deploy -s dev --no-confirm --aws-profile ctrl-alt-del --region us-east-1
-```
-
-And there you go, the whole thing has been deployed with a bit of configuration and 3 commands.
 
 # Credits
 
@@ -194,12 +172,13 @@ https://blog.truework.com/2018-07-09-s3-antivirus-lambda-function
 
 https://serverless-stack.com/
 
+## File downloads
+
+I wanted to implement downloads in such a way as to not naviate away from the app, which was a bit tricky. To do this, I'm using the StreamSave.js library, which uses a combination of service workers, blobs, and other trickery to load the file via javascript.
+
 # TODO
 
 Docs on the process for updating the virus scanning engine.
 
-It'd be nice to get the bucket policy which prevents unencrypted uploads working, but it's probably a shortcoming of the Amplify library.
+Make object expiration configurable at upload time by creating lifecycle rules that operate on object tags? Seems easy enough...
 
-Also if I could get the Amplify library to properly list items in S3, I could potentially remove the API Gateway/Lambda endpoint for file listing.
-
-Get the Cognito CloudFormation template to only allow admin to create users and customize the email templates (if that's supported).

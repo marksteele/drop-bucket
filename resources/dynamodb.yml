@@ -1,0 +1,47 @@
+Resources:
+  FileSharingTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ${self:custom.dynamoDbTableName}
+      AttributeDefinitions:
+      - AttributeName: shareId
+        AttributeType: S
+      - AttributeName: email_to
+        AttributeType: S
+      - AttributeName: email_from
+        AttributeType: S
+      KeySchema:
+      - AttributeName: shareId
+        KeyType: HASH
+      GlobalSecondaryIndexes:
+      - IndexName: ${self:custom.dynamoDbTableToIdx}
+        Projection: 
+          ProjectionType: ALL
+        KeySchema:
+        - AttributeName: email_to
+          KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+      - IndexName: ${self:custom.dynamoDbTableFromIdx}
+        Projection: 
+          ProjectionType: ALL
+        KeySchema:
+        - AttributeName: email_from
+          KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      TimeToLiveSpecification:
+        AttributeName: 'ttl'
+        Enabled: true
+      SSESpecification:
+        SSEEnabled: true
+
+Outputs:
+  FileSharingTableName:
+    Value:
+      Ref: FileSharingTable

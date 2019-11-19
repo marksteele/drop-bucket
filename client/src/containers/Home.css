@@ -19,14 +19,6 @@
   margin-right: 20px;
 }
 
-.Home .files h4 {
-  font-family: "Open Sans", sans-serif;
-  font-weight: 600;
-  overflow: hidden;
-  line-height: 1.5;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-.Home .files p {
-  color: #666;
+.Home {
+  min-height: 500px;
 }
