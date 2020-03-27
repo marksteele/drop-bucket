@@ -7,14 +7,14 @@ const cwd = proc.cwd();
 
 function setSSMParam(data) {
   console.log('Setting SSM parameters');
-  console.log(cp.execSync(`/usr/local/bin/aws ssm put-parameter --name "/ctrl-alt-del/drop-bucket/${data.DeploymentStage}/COGNITO_IDENTITY_POOL_ID" --value "${data.IdentityPoolId}" --region ${data.DeploymentRegion} --profile ${data.DeploymentAwsProfile} --type String --overwrite`).toString());
-  console.log(cp.execSync(`/usr/local/bin/aws ssm put-parameter --name "/ctrl-alt-del/drop-bucket/${data.DeploymentStage}/COGNITO_USER_POOL_ID" --value "${data.UserPoolId}" --region ${data.DeploymentRegion} --profile ${data.DeploymentAwsProfile} --type String --overwrite`).toString());
+  console.log(cp.execSync(`/usr/bin/aws ssm put-parameter --name "/ctrl-alt-del/drop-bucket/${data.DeploymentStage}/COGNITO_IDENTITY_POOL_ID" --value "${data.IdentityPoolId}" --region ${data.DeploymentRegion} --profile ${data.DeploymentAwsProfile} --type String --overwrite`).toString());
+  console.log(cp.execSync(`/usr/bin/aws ssm put-parameter --name "/ctrl-alt-del/drop-bucket/${data.DeploymentStage}/COGNITO_USER_POOL_ID" --value "${data.UserPoolId}" --region ${data.DeploymentRegion} --profile ${data.DeploymentAwsProfile} --type String --overwrite`).toString());
 }
 
 function buildClientUI() {
   console.log('Building client UI');
-  console.log(cp.execSync('/usr/local/bin/npm i', { cwd: `${cwd}/client` }).toString());
-  console.log(cp.execSync('/usr/local/bin/npm run build', { cwd: `${cwd}/client` }).toString());
+  console.log(cp.execSync('/usr/bin/npm i', { cwd: `${cwd}/client` }).toString());
+  console.log(cp.execSync('/usr/bin/npm run build', { cwd: `${cwd}/client` }).toString());
 }
 
 function writeConfig(data) {
